@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karbonhidrat Metabolizması — Anki SM-2, Ölçme-Değerlendirme &amp; Unutma Eğrisi Stüdyosu</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .cloze-blank {
+      display: inline-block;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: rgba(79, 70, 229, 0.14);
+      color: #4f46e5;
+      font-weight: 800;
+      border-bottom: 2px dashed #4f46e5;
+    }
+    .dark .cloze-blank {
+      background: rgba(129, 140, 248, 0.2);
+      color: #a5b4fc;
+      border-bottom-color: #818cf8;
+    }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen antialiased">
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-emerald-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm shrink-0">
+            AK
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-sm sm:text-base font-extrabold tracking-tight truncate">Karbonhidrat Metabolizması Anki Pro</h1>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">SM-2 Aralıklı Tekrar • Ölçme-Değerlendirme • Unutma &amp; Gelişim Eğrisi</p>
+          </div>
+        </div>
+
+        <nav class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto max-w-full" aria-label="Ana Modlar">
+          <button data-action="set-tab" data-tab="anki" id="nav-anki" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+            🎓 Öğretici Anki
+          </button>
+          <button data-action="set-tab" data-tab="turbo" id="nav-turbo" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+            ⚡ Hızlı Tekrar
+          </button>
+          <button data-action="set-tab" data-tab="exam" id="nav-exam" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+            📝 Ölçme &amp; Değerlendirme
+          </button>
+          <button data-action="set-tab" data-tab="stats" id="nav-stats" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap">
+            📈 Eğriler &amp; İstatistik
+          </button>
+        </nav>
+
+        <div class="flex items-center gap-1.5">
+          <button data-action="open-sync" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold hover:bg-indigo-100 transition whitespace-nowrap" title="Kişisel Hafıza Linki & Yedek">
+            🔗 Hafıza Linki
+          </button>
+          <button data-action="toggle-theme" id="theme-btn" class="p-1.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs">
+            🌙
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-5 py-4 sm:py-6"></main>
+
+    <!-- Personal Memory Link Modal -->
+    <div id="sync-modal-root"></div>
+
+    <!-- Toast -->
+    <div id="toast-box" class="fixed bottom-4 right-4 z-50 pointer-events-none flex flex-col gap-2"></div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // =========================================================================
+  // 1. KONU BAŞLIKLARI (Prof. Dr. Canan Küçükgergin PDF — 208 Sayfa)
+  // =========================================================================
+  const TOPICS = [
+    { id: 'chem', name: '1. KH Kimyası & İzomeri', short: 'KH Kimyası' },
+    { id: 'digest', name: '2. Sindirim & Emilim', short: 'Sindirim' },
+    { id: 'glyc', name: '3. Glikoliz & 2,3-BPG', short: 'Glikoliz' },
+    { id: 'pdh', name: '4. PDH Kompleksi', short: 'PDH' },
+    { id: 'tca', name: '5. Krebs (TCA) & Mekikler', short: 'Krebs & Mekik' },
+    { id: 'ppp', name: '6. Pentoz Fosfat & Radikaller', short: 'PPP & G6PD' },
+    { id: 'other', name: '7. Früktoz, Galaktoz, Poliol', short: 'Diğer Şekerler' },
+    { id: 'gng', name: '8. Glikoneojenez & Cori', short: 'Glikoneojenez' },
+    { id: 'glg', name: '9. Glikojen & GSD', short: 'Glikojen' },
+    { id: 'dm', name: '10. Hormonlar, DM & Hipoglisemi', short: 'DM & Hormon' }
+  ];
+
+  // =========================================================================
+  // 2. 64 ADET YÜKSEK VERİMLİ SPOT ANKİ KARTI (Öğretici İpucu + Klinik Tuzak)
+  // =========================================================================
+  const CARDS = [
+    // --- 1. KH KİMYASI (s.1-19) ---
+    { id: 'c01', topic: 'chem', page: 's.10', tag: 'Spot',
+      q: 'Asimetrik (kiral) karbon atomu İÇERMEYEN tek monosakkarit hangisidir?',
+      hint: '3 karbonlu ketotriozdur; simetrik iki CH₂OH ucu vardır.',
+      a: 'Dihidroksiaseton (Ketotrioz)',
+      why: 'Dihidroksiasetonun (HOCH₂–CO–CH₂OH) hiçbir karbonu 4 farklı gruba bağlı değildir. Gliseraldehit (1), ketopentoz (2), aldopentoz/ketoheksoz (3), aldoheksoz (4) asimetrik karbon içerir.',
+      trap: 'Stereoizomer sayısı 2ⁿ formülüyle hesaplanır: Aldoheksozda 2⁴ = 16 stereoizomer (8 D, 8 L) vardır.' },
+    { id: 'c02', topic: 'chem', page: 's.6, 12', tag: 'Epimer & Anomer',
+      q: 'D-Glikozun C2 epimeri ve C4 epimeri olan aldoheksozlar sırasıyla hangileridir?',
+      hint: 'Biri M ile başlar, diğeri süt şekerinin parçasıdır.',
+      a: 'C2 epimeri: D-Mannoz | C4 epimeri: D-Galaktoz',
+      why: 'Epimerler yalnızca tek bir asimetrik karbon atomundaki -OH yönelimiyle farklılaşır. Galaktoz metabolizmasında UDP-Galaktoz 4-Epimeraz bu C4 farkını düzeltir.',
+      trap: 'Anomer (α vs β) ise halka kapanınca yeni oluşan C1 (aldoz) veya C2 (ketoz) karbonundaki -OH yönelimidir.' },
+    { id: 'c03', topic: 'chem', page: 's.15-18', tag: 'Disakkarit Bağı',
+      q: 'Sükroz (Sakkaroz) ve Trehaloz neden İNDİRGEYİCİ (redüktan) şeker DEĞİLDİR?',
+      hint: 'Glikozid bağının hangi karbonlar arasında kurulduğunu düşün.',
+      a: 'Her iki monosakkaritin de anomerik (asetal) karbonları glikozid bağına katıldığı için serbest asetal hidroksilleri yoktur.',
+      why: 'Sükrozda α-(1,2) (Glikoz C1 + Früktoz C2), Trehalozda α-(1,1) bağı vardır. Maltoz α-(1,4) ve Laktoz β-(1,4) ise serbest anomerik karbon taşıdığı için indirgeyicidir.',
+      trap: 'Sınav tuzağı: Laktoz (β-1,4) ve Maltoz (α-1,4) indirgeyicidir; Sükroz ve Trehaloz indirgeyici değildir!' },
+    { id: 'c04', topic: 'chem', page: 's.19', tag: 'Polisakkarit',
+      q: 'Homopolisakkarit olan ve böbrekte GFR (glomerüler filtrasyon hızı) ölçümünde kullanılan früktoz polimeri hangisidir?',
+      hint: 'PDF s.19 homopolisakkarit listesinin son elemanı; insülinle karıştırılır!',
+      a: 'İnülin',
+      why: 'Homopolisakkaritler: Nişasta, Glikojen, Sellüloz, Dekstran, İnülin. Heteropolisakkaritler (GAG): Hiyaluronik asit, Kondroitin sülfat, Keratan sülfat, Heparin.',
+      trap: 'İnülin (früktoz polimeri) ile İnsülin (hormon) sınavda bilerek karıştırılır.' },
+
+    // --- 2. SİNDİRİM & EMİLİM (s.20-24) ---
+    { id: 'c05', topic: 'digest', page: 's.22', tag: 'Sindirim',
+      q: 'Tükürük ve pankreas α-amilazları nişastadaki hangi bağları kırar, hangilerini KIRAMAZ?',
+      hint: 'Dallanma noktalarında geriye %30 oranında sınır dekstrinleri kalır.',
+      a: 'Yalnızca iç α-(1,4) bağlarını kırar; dallanma noktalarındaki α-(1,6) bağlarını kıramaz.',
+      why: 'Sonuçta serbest glikoz değil; %40 Maltoz, %25 Maltotrioz, %30 Sınır dekstrinleri ve %5 Oligosakkarit oluşur. Son parçalama ince bağırsak fırçamsı kenarındaki α-glikozidaz ve α-dekstrinazla yapılır.',
+      trap: 'Akarboz ilacı ince bağırsak α-glikozidazını inhibe ederek Tip 2 DM’de tokluk şekerini düşürür.' },
+    { id: 'c06', topic: 'digest', page: 's.23', tag: 'Taşıyıcılar',
+      q: 'İnce bağırsak lümeninden enterosit içine Glikoz/Galaktoz ile Früktoz sırasıyla hangi taşıyıcılarla girer?',
+      hint: 'Biri 2 Na⁺ ile sekonder aktif taşıma yapar, diğeri pasif kolaylaştırılmış difüzyondur.',
+      a: 'Glikoz & Galaktoz: SGLT-1 (2 Na⁺ bağımlı) | Früktoz: GLUT-5 (Na⁺ bağımsız)',
+      why: 'SGLT-1’in çalışması için gereken Na⁺ gradyentini bazolateral membrandaki Na⁺-K⁺ ATPaz sağlar. Her üç monosakkarit de enterositten kana bazolateral GLUT-2 ile geçer.',
+      trap: 'İshalde ORS (tuzlu-şekerli su) tedavisinin temeli SGLT-1’in Na⁺ + Glikozla birlikte su çekmesidir!' },
+    { id: 'c07', topic: 'digest', page: 's.24', tag: 'Klinik',
+      q: 'Fırçamsı kenar laktaz eksikliğinde (Laktoz İntoleransı) ishal ve gazın mekanizması nedir?',
+      hint: 'Sindirilemeyen disakkarit kolona ulaşınca iki şey olur.',
+      a: 'Laktoz kolonda ozmotik su çeker (ozmotik ishal) ve kolon bakterilerince fermente edilerek gaz (H₂, CO₂) ve organik asit oluşturur.',
+      why: 'Laktaz, laktozun β-(1,4) glikozid bağını kırar. Eksikliğinde süt ürünlerinden sonra şişkinlik, kramp ve sulu ishal görülür.',
+      trap: 'Laktoz intoleransı bir süt proteini alerjisi DEĞİLDİR; tamamen enzim eksikliğidir.' },
+
+    // --- 3. GLİKOLİZ & 2,3-BPG (s.27-57) ---
+    { id: 'c08', topic: 'glyc', page: 's.29-30', tag: 'Temel Mantık',
+      q: 'Glikoz hücreye girer girmez Heksokinaz/Glikokinaz ile neden 6. karbonundan fosfatlanır?',
+      hint: 'Hücre zarındaki GLUT taşıyıcılarının yapısını düşün.',
+      a: 'Negatif yüklü fosfat grubu eklenince Glikoz 6-P zardan/GLUT’tan dışarı çıkamaz (hücre içinde hapsedilir).',
+      why: 'Ayrıca hücre içi serbest glikoz düşük tutulduğu için konsantrasyon farkıyla dışarıdan yeni glikoz girişi kolaylaşır.',
+      trap: 'Karaciğer ve böbrekteki Glikoz 6-fosfataz bu fosfatı koparmadan glikoz kana geri çıkamaz!' },
+    { id: 'c09', topic: 'glyc', page: 's.30', tag: 'Enzim Kinetiği',
+      q: 'Heksokinaz (tüm dokular) ile Glikokinaz (karaciğer & pankreas β) arasındaki 3 temel fark nedir?',
+      hint: 'Km, Vmax, G6P inhibisyonu ve insülin yanıtı.',
+      a: 'Glikokinaz: Yüksek Km (düşük ilgi), yüksek Vmax, G6P ile İNHİBE OLMAZ ve İnsülinle indüklenir.',
+      why: 'Açlıkta düşük Km’li Heksokinaz beyin/kası besler; toklukta yüksek Km’li Glikokinaz kan şekeri yükselince devreye girip karaciğerde glikojenez için glikozu hızla çeker.',
+      trap: 'Glikokinaz mutasyonu MODY Tip 2 diyabete yol açar.' },
+    { id: 'c10', topic: 'glyc', page: 's.34-35', tag: 'Hız Kısıtlayıcı',
+      q: 'Glikolizin ANA hız kısıtlayıcı enzimi hangisidir? En güçlü aktivatörü ve 4 ana inhibitörü nedir?',
+      hint: '3. basamak — geri dönüşsüz karar noktası.',
+      a: 'Fosfofrüktokinaz-1 (PFK-1). En güçlü aktivatör: Früktoz 2,6-bisfosfat (ayrıca AMP, ADP). İnhibitörler: ATP, Sitrat, H⁺ (asidoz), Yağ asitleri.',
+      why: 'G6P başka yolaklara gidebilir ama F-1,6-BP artık yalnızca glikolize mahkumdur. Kas PFK-1 eksikliği Tarui hastalığıdır (GSD Tip VII).',
+      trap: 'Dikkat: ATP hem PFK-1’in substratı hem de yüksek dozda allosterik inhibitörüdür!' },
+    { id: 'c11', topic: 'glyc', page: 's.36, 41', tag: 'Hormonal Kontrol',
+      q: 'Açlıkta Glukagon, karaciğerde bifonksiyonel PFK-2 / FBPaz-2 enzimini PKA ile fosforilleyince ne olur?',
+      hint: 'F-2,6-BP düzeyi artar mı, azalır mı?',
+      a: 'PFK-2 İNAKTİF, FBPaz-2 AKTİF olur → Früktoz 2,6-bisfosfat AZALIR → PFK-1 (glikoliz) frenlenir, F-1,6-BPaz (glikoneojenez) açılır!',
+      why: 'İnsülin ise Protein Fosfatazı aktive edip fosfatı koparır → PFK-2 aktif → F-2,6-BP artar → karaciğerde glikoliz hızlanır.',
+      trap: 'PFK-1 ile PFK-2’yi karıştırma: PFK-1 glikoliz yolundadır (F-1,6-BP yapar); PFK-2 sadece düzenleyici F-2,6-BP üretir!' },
+    { id: 'c12', topic: 'glyc', page: 's.43-44', tag: 'İnhibitör',
+      q: 'Arsenat (AsO₄³⁻) Gliseraldehit 3-fosfat Dehidrojenaz (GAPDH) basamağında ne yapar?',
+      hint: 'Glikoliz durur mu, yoksa devam edip ATP’yi mi sıfırlar?',
+      a: 'İnorganik fosfat (Pi) yerine geçerek 1-arseno-3-fosfogliserat oluşturur; bu bileşik spontan hidroliz olduğu için glikoliz devam eder ama PGK basamağındaki ATP üretimi SIFIRLANIR (Net 0 ATP)!',
+      why: 'İyodoasetat ise GAPDH’ın aktif merkezindeki -SH grubunu bloke edip glikolizi tamamen durdurur.',
+      trap: 'Arsenat (As⁵⁺) = Glikoliz ATP’sini sıfırlar; Arsenit (As³⁺) = PDH & α-KGDH’daki lipoatı bloke eder!' },
+    { id: 'c13', topic: 'glyc', page: 's.47', tag: 'Laboratuvar & İnhibitör',
+      q: 'Kan şekeri ölçüm tüplerine (gri kapaklı tüp) konulan Sodyum Florür (NaF) hangi enzimi inhibe eder?',
+      hint: '2-Fosfogliserat → Fosfoenolpiruvat basamağı.',
+      a: 'Enolaz (Mg²⁺ ile florofosfat kompleksi oluşturarak)',
+      why: 'Tüpteki eritrositlerin laboratuvara gidene kadar glikoliz yapıp kan şekerini yalancı düşük göstermesini önler.',
+      trap: 'Glikolizde Mg²⁺ gerektiren enzimler: Kinazlar (HK, PFK-1, PGK, PK) ve Enolaz.' },
+    { id: 'c14', topic: 'glyc', page: 's.48-49', tag: 'Klinik & Regülasyon',
+      q: 'Piruvat Kinazın ileri-besleme (feed-forward) aktivatörü nedir ve eksikliğinde hangi tablo görülür?',
+      hint: 'Yukarıdaki bir glikoliz ara ürünü aşağıyı uyarır; eritrositleri düşün.',
+      a: 'Aktivatör: Früktoz 1,6-bisfosfat. Eksikliği: Eritrositlerde ATP yetersizliğine bağlı kronik hemolitik anemi (2. en sık enzimopati).',
+      why: 'İnhibitörleri: ATP, Alanin, Asetil-KoA, Yağ asitleri ve Glukagon (PKA fosforilasyonu → inaktif). PK eksikliğinde blokajın üstünde 2,3-BPG biriktiği için hastalar anemiyi görece iyi tolere eder.',
+      trap: 'Glikolizin 3 geri dönüşümsüz enzimi: Heksokinaz/Glikokinaz, PFK-1, Piruvat Kinaz.' },
+    { id: 'c15', topic: 'glyc', page: 's.52-53', tag: 'Anaerobik Glikoliz',
+      q: 'Oksijen yokluğunda veya eritrositte Piruvatın LDH ile Laktata dönüşmesinin ASIL biyokimyasal amacı nedir?',
+      hint: 'Bu basamakta ATP üretilmez; GAPDH’ın devamı için ne lazım?',
+      a: 'GAPDH basamağında tüketilen NAD⁺’ı yenileyerek glikolizin durmasını önlemek.',
+      why: 'Anaerobik glikolizde 1 Glikoz → 2 Laktat + 2 ATP (net). Mitokondrisiz eritrositlerin tek enerji kaynağıdır.',
+      trap: 'Laktat oluşumu ekstra ATP üretmez; sadece 2 ATP’lik glikolizin kilitlenmeden sürmesini sağlar.' },
+    { id: 'c16', topic: 'glyc', page: 's.56', tag: '2,3-BPG Şantı',
+      q: 'Eritrositlerdeki Rapoport-Luebering (2,3-BPG) şantı hangi basamağı atlar ve ne işe yarar?',
+      hint: '1,3-BPG → 2,3-BPG → 3-Fosfogliserat.',
+      a: 'Fosfogliserat Kinaz (ATP üreten) basamağını atlar; oluşan 2,3-BPG hemoglobinin O₂ ilgisini azaltarak (eğriyi sağa kaydırıp) dokulara O₂ bırakılmasını kolaylaştırır.',
+      why: 'Bisfosfogliserat mutaz 1,3-BPG’yi 2,3-BPG’ye çevirir. Yüksek rakım ve kronik hipokside bu şant artar.',
+      trap: 'Şant aktifken bu basamaktan ATP kazanılmaz ama eritrosit için doku oksijenasyonu hayati önceliktir.' },
+
+    // --- 4. PDH KOMPLEKSİ (s.58-66) ---
+    { id: 'c17', topic: 'pdh', page: 's.58-65', tag: '5 Koenzim Şifresi',
+      q: 'Piruvat Dehidrojenaz (PDH) kompleksinin 3 enzimi ve 5 koenzimi ("TLC For Nancy") nelerdir?',
+      hint: 'B1, Lipoat, B5, B2, B3 vitamin türevleri.',
+      a: 'E1 (PDH), E2 (Dihidrolipoil transasetilaz), E3 (Dihidrolipoil DH) | 5 Koenzim: TPP (B1), Lipoat, KoA (B5), FAD (B2), NAD⁺ (B3).',
+      why: 'Mitokondri matrisinde 1 Piruvat → 1 Asetil-KoA + 1 CO₂ + 1 NADH + H⁺ (1 glikoz için 2 NADH = 5 ATP). Reaksiyon KESİNLİKLE GERİ DÖNÜŞÜMSÜZDÜR!',
+      trap: 'Aynı 5 koenzim Krebs’teki α-Ketoglutarat Dehidrojenaz kompleksinde de birebir kullanılır!' },
+    { id: 'c18', topic: 'pdh', page: 's.66', tag: 'Kovalent Kontrol',
+      q: 'PDH kompleksi fosforilasyonla mı yoksa defosforilasyonla mı AKTİF olur? İnsülin ve Ca²⁺ ne yapar?',
+      hint: 'Glikojen fosforilazın tam tersi!',
+      a: 'DEFOSFORİLE PDH = AKTİF | FOSFORİLE PDH = İNAKTİF. İnsülin ve Ca²⁺, PDH Fosfatazı uyararak PDH’yi AKTİVE eder.',
+      why: 'Asetil-KoA, NADH ve ATP ise PDH Kinazı aktive edip E1’i fosforiller (inaktif). Piruvat ve Ca²⁺ PDH kinazı inhibe eder.',
+      trap: 'Sınav tuzağı: PDH Kinaz enzimi PDH’yi AÇMAZ, KAPATIR!' },
+    { id: 'c19', topic: 'pdh', page: 's.59-61', tag: 'Klinik & Toksin',
+      q: 'Alkolik hastaya IV dekstroz (glikoz) vermeden önce neden Tiamin (B1) verilir? Arsenit/Cıva PDH’de nereyi bağlar?',
+      hint: 'E1 (TPP) ve E2 (Lipoat -SH).',
+      a: 'B1 eksikliğinde glikoz yüklenirse PDH (E1-TPP) tıkalı olduğundan piruvat laktata yığılır ve akut Wernicke ensefalopatisi + laktik asidoz gelişir. Arsenit/Cıva E2’deki Lipoatın -SH gruplarını bağlar.',
+      why: 'Konjenital PDH eksikliğinde de laktik asidoz görülür ve tedavisinde PDH’yi atlayıp doğrudan Asetil-KoA veren KETOJENİK DİYET (yağlar, lösin, lizin) uygulanır.',
+      trap: 'PDH tek yönlü olduğu için insan vücudu çift karbonlu yağ asitlerinden (Asetil-KoA) asla net glikoz üretemez!' },
+
+    // --- 5. KREBS (TCA) & MEKİKLER (s.67-92) ---
+    { id: 'c20', topic: 'tca', page: 's.77-78', tag: 'Enerji Bilançosu',
+      q: '1 mol Asetil-KoA’nın Sitrik Asit Siklusunda oksidasyonundan net ne elde edilir (kaç ATP)?',
+      hint: '3 NADH + 1 FADH₂ + 1 GTP.',
+      a: '2 CO₂ + 3 NADH (7,5 ATP) + 1 FADH₂ (1,5 ATP) + 1 GTP (1 ATP) = TOPLAM 10 ATP (1 Glikoz = 2 tur = 20 ATP).',
+      why: 'PDF s.78’de eski/yeni hesap yanında s.79’da güncel Hinkle oranlarıyla (1 NADH = 2,5 ATP; 1 FADH₂ = 1,5 ATP) 2 tur Krebs = 20 ATP olarak verilir.',
+      trap: 'Krebs’teki TEK substrat düzeyinde fosforilasyon basamağı Süksinat Tiyokinazdır (Süksinil-KoA → Süksinat + GTP).' },
+    { id: 'c21', topic: 'tca', page: 's.90', tag: 'Hız Kısıtlayıcı',
+      q: 'Sitrik Asit Siklusunun 3 geri dönüşümsüz enzimi ve ANA hız kısıtlayıcı basamağı hangisidir?',
+      hint: 'ADP ile güçlü aktive olan 3. basamak.',
+      a: '3 Geri Dönüşümsüz: Sitrat sentaz, İzositrat DH, α-Ketoglutarat DH. ANA Hız Kısıtlayıcı: İzositrat Dehidrojenaz (ADP & NAD⁺ aktive; ATP & NADH inhibe eder).',
+      why: 'Sitrat sentaz (ATP, NADH, Sitrat, Süksinil-KoA ile inhibe) ve α-KGDH (ATP, NADH, Süksinil-KoA ile inhibe) diğer kontrol noktalarıdır.',
+      trap: 'Krebs’te O₂ doğrudan hiçbir basamağa girmez ama O₂ yoksa NADH/FADH₂ oksitlenemediği için döngü hemen durur.' },
+    { id: 'c22', topic: 'tca', page: 's.69, 71, 74', tag: 'İnhibitör Üçlüsü',
+      q: 'Krebs döngüsünün 3 klasik toksin/inhibitörü (Floroasetat, Arsenit, Malonat) hangi enzimleri durdurur?',
+      hint: 'Akonitaz, α-KGDH, Süksinat DH.',
+      a: 'Floroasetat (→ Florositrat): Akonitaz | Arsenit: α-Ketoglutarat DH (lipoat) | Malonat: Süksinat DH (kompetitif inhibitör).',
+      why: 'Süksinat Dehidrojenaz aynı zamanda mitokondri İÇ MEMBRANINA gömülü (ETZ Kompleks II) tek Krebs enzimidir.',
+      trap: 'Malonat yarışmalı (kompetitif) inhibitördür; ortamda Süksinat artırılırsa inhibisyon aşılabilir.' },
+    { id: 'c23', topic: 'tca', page: 's.79-82', tag: 'Mekik Sistemleri',
+      q: '1 Glikozun aerobik oksidasyonunda neden bazen 30 ATP, bazen 32 ATP elde edilir?',
+      hint: 'Glikolizdeki 2 sitozolik NADH mitokondriye hangi mekikle girer?',
+      a: 'Gliserol 3-P Mekiği (iskelet kası/beyin) elektronları FAD’a verir (+3 ATP → 30 ATP) | Malat-Aspartat Mekiği (karaciğer/kalp/böbrek) NAD⁺’a verir (+5 ATP → 32 ATP).',
+      why: 'Sabit kazançlar: Glikoliz 2 ATP + PDH 5 ATP + 2 tur Krebs 20 ATP = 27 ATP. Mekik (+3 veya +5) ile 30 veya 32 ATP olur.',
+      trap: 'NADH mitokondri iç membranından doğrudan geçemez; sadece elektronları mekikle taşınır.' },
+    { id: 'c24', topic: 'tca', page: 's.87-92', tag: 'Sitrat Mekiği & Anapleroz',
+      q: 'Mitokondrideki Asetil-KoA yağ asidi sentezi için sitozole hangi molekül halinde çıkar ve hangi enzimle parçalanır?',
+      hint: 'Asetil-KoA zardan geçemez; 6 karbonlu moleküle dönüşüp çıkar.',
+      a: 'Sitrat halinde çıkar (Sitrat Mekiği) ve sitozolde ATP-Sitrat Liyaz ile tekrar Asetil-KoA + Oksalasetat’a ayrılır.',
+      why: 'Sitozoldeki Oksalasetat Malata döner; Malat ise Malik Enzimle Piruvata dönerken yağ sentezi için NADPH üretir! Krebs’ten eksilen OAA’yı mitokondride dolduran ana anaplerotik enzim Piruvat Karboksilazdır.',
+      trap: 'Krebs’te HEM sentezine giden ara ürün: Süksinil-KoA!' },
+
+    // --- 6. PENTOZ FOSFAT YOLU & RADİKALLER (s.93-125) ---
+    { id: 'c25', topic: 'ppp', page: 's.26, 94', tag: 'NADPH Kaynak & Kullanım',
+      q: 'Hücrede NADPH üreten 3 reaksiyon ve NADPH’ın kullanıldığı 5 ana olay nedir?',
+      hint: 'PPP ana kaynaktır; diğer ikisi Malik enzim ve NADP⁺-İzositrat DH.',
+      a: 'Üretenler: 1) Pentoz Fosfat Yolu, 2) Malik Enzim, 3) NADP⁺-bağımlı İzositrat DH. Kullananlar: Yağ asidi, Kolesterol, Steroid hormon sentezleri + İlaç detoksifikasyonu + Glutatyon rejenerasyonu.',
+      why: 'Pentoz Fosfat Yolu tamamen sitozoldedir; ATP üretmez ve ATP harcamaz.',
+      trap: 'Sınav tuzağı: NADH katabolik (ATP üretimi), NADPH ise anabolik (biyosentez + antioksidan) koenzimdir!' },
+    { id: 'c26', topic: 'ppp', page: 's.95-97', tag: 'Hız Kısıtlayıcı',
+      q: 'Pentoz Fosfat Yolunun hız kısıtlayıcı enzimi hangisidir ve hızını belirleyen ana şalter nedir?',
+      hint: 'Oksidatif fazın 1. enzimi.',
+      a: 'Glikoz 6-fosfat Dehidrojenaz (G6PD). Ana uyarıcı şalter: Sitozoldeki NADP⁺ düzeyi (NADPH ise güçlü kompetitif inhibitördür).',
+      why: 'Oksidatif fazda 1 G6P → 1 Ribüloz 5-P + 2 NADPH + 2 H⁺ + 1 CO₂ (geri dönüşümsüz).',
+      trap: '6 G6P tam geri dönüşüm döngüsüne girerse: 6 G6P → 5 G6P + 12 NADPH + 6 CO₂ (PDF s.106-107).' },
+    { id: 'c27', topic: 'ppp', page: 's.101-105', tag: 'Non-Oksidatif Faz',
+      q: 'Transketolaz ve Transaldolaz kaçar karbon aktarır? Hangisi Tiamin Pirofosfat (TPP/B1) bağımlıdır?',
+      hint: 'Keto = 2C (B1 lazım), Aldol = 3C (B1 gerekmez).',
+      a: 'Transketolaz: 2 karbon aktarır ve TPP (B1) bağımlıdır | Transaldolaz: 3 karbon aktarır (TPP gerektirmez).',
+      why: 'PDF s.102 kuralı: 2C veya 3C birimini VEREN şeker daima KETOZ, ALAN şeker daima ALDOZDUR. Eritrosit Transketolaz aktivitesi B1 eksikliğinin tanı testidir.',
+      trap: 'Hücrede sadece Riboz 5-P gerekirse (NADPH gerekmiyorsa) glikolizden F6P + GA3P tersine çalışıp oksidatif faza girmeden Riboz 5-P üretir!' },
+    { id: 'c28', topic: 'ppp', page: 's.110-111', tag: 'Klinik — Favizm',
+      q: 'G6PD eksikliğinde (Favizm) bakla, primakin veya enfeksiyon sonrası neden HEMOLİTİK KRİZ ve HEİNZ CİSİMCİKLERİ oluşur?',
+      hint: 'Eritrositin tek NADPH kaynağı kesilince GSH’a ne olur?',
+      a: 'NADPH yetersizliği → Glutatyon Redüktaz çalışamaz → İndirgenmiş GSH tükenir → H₂O₂ ve OH• temizlenemez → Hemoglobin denatüre olup çöker (Heinz cisimcikleri) + zar lipit peroksidasyonu → HEMOLİZ!',
+      why: 'X’e bağlı kalıtılır (>200 milyon kişi). Çoğu hasta oksidan tetikleyici olmadan tamamen asemptomatiktir.',
+      trap: 'Selenyum bağımlı Glutatyon Peroksidaz (GSH-Px) H₂O₂’yi suya çevirir; FAD ve NADPH bağımlı Glutatyon Redüktaz (GSH-R) GSSG’yi tekrar GSH yapar.' },
+    { id: 'c29', topic: 'ppp', page: 's.112, 115, 121', tag: 'Serbest Radikaller',
+      q: 'Fenton ve Haber-Weiss reaksiyonlarının ortak yıkıcı ürünü nedir ve hangi metal katalizler?',
+      hint: 'H₂O₂ + Fe²⁺ → ?',
+      a: 'Hidroksil radikali (OH•) — Demir (Fe²⁺ / Fe³⁺) kataliziyle oluşur!',
+      why: 'Fenton: H₂O₂ + Fe²⁺ → OH• + OH⁻ + Fe³⁺. Haber-Weiss: H₂O₂ + O₂•⁻ → OH• + OH⁻ + O₂. OH• çok doymamış yağ asitlerine saldırıp lipit peroksidasyonunu başlatır.',
+      trap: 'PDF s.116: H₂O₂, O₃, HOCl, Singlet O₂, LOOH ve ONOO⁻ radikal OLMAYAN reaktif bileşiklerdir (ortaklanmamış elektronları yoktur)!' },
+
+    // --- 7. ÜRONİK ASİT, POLİOL, FRÜKTOZ, GALAKTOZ (s.126-128) ---
+    { id: 'c30', topic: 'other', page: 's.126', tag: 'Üronik Asit Yolu',
+      q: 'İnsanlar neden C vitamini (L-askorbik asit) sentezleyemez? Esansiyel pentozüride hangi enzim eksiktir?',
+      hint: 'Üronik asit yolunun iki klasik enzim eksikliği.',
+      a: 'C vitamini sentezlenemez çünkü L-Gulonolakton oksidaz eksiktir. Esansiyel pentozüride (benign) L-Ksilüloz redüktaz eksiktir.',
+      why: 'Üronik asit yolunun insandaki ana ürünü UDP-Glikuronattır (bilirubin/ilaç glikuronidasyonu ve proteoglikan sentezi).',
+      trap: 'Esansiyel pentozüri zararsızdır ama idrarda indirgeyici şeker (+) verip yanlışlıkla diyabet sanılabilir.' },
+    { id: 'c31', topic: 'other', page: 's.127', tag: 'Poliol Yolu',
+      q: 'Diyabette lens (katarakt) ve Schwann hücrelerinde (nöropati) ozmotik hasar yapan enzim ve molekül çifti nedir?',
+      hint: 'Glikoz + NADPH → ? (Sorbitol DH bu dokularda azdır).',
+      a: 'Aldoz Redüktaz → Sorbitol birikimi!',
+      why: 'Lens, retina, periferik sinir ve böbrekte Sorbitol Dehidrojenaz çok azdır. Hiperglisemide Sorbitol birikip hücreyi şişirir ve NADPH tükettiği için oksidatif stresi artırır.',
+      trap: 'Seminal vezikülde ise Sorbitol DH boldur; spermlere enerji kaynağı olarak Früktoz üretir!' },
+    { id: 'c32', topic: 'other', page: 's.127', tag: 'Früktoz — Kritik Ayrım',
+      q: 'Früktokinaz eksikliği ile Aldolaz B eksikliği arasındaki HAYATİ klinik fark nedir?',
+      hint: 'Biri tamamen sessizdir (benign), diğeri ağır hipoglisemi yapar.',
+      a: 'Früktokinaz eksikliği (Esansiyel früktözüri): Tamamen BENİGN | Aldolaz B eksikliği (Herediter Früktoz İntoleransı): F-1-P birikimi → Pi & ATP tükenmesi → AĞIR HİPOGLİSEMİ, kusma, sarılık, karaciğer yetmezliği!',
+      why: 'HFI tipik olarak bebek 4–6. ayda meyve suyu/sükrozlu ek gıdaya geçince başlar. Ayrıca Früktoz karaciğerde PFK-1’i bypass ettiği için glikozdan çok daha hızlı metabolize olur.',
+      trap: 'HFI hastasına früktoz, sükroz ve SORBİTOL (vücutta früktoza döner!) kesinlikle yasaktır.' },
+    { id: 'c33', topic: 'other', page: 's.128', tag: 'Galaktozemi',
+      q: 'Klasik Galaktozemide eksik enzim nedir ve HFI’den (Aldolaz B) nasıl ayırt edilir?',
+      hint: 'Anne sütü + yenidoğan kataraktı.',
+      a: 'Eksik enzim: GALT (Galaktoz 1-fosfat üridil transferaz). Doğumdan hemen sonra ANNE SÜTÜ (laktoz) ile başlar ve Galaktitol birikimine bağlı KATARAKT görülür (HFI’de katarakt yoktur, ek gıdada başlar).',
+      why: 'Galaktokinaz eksikliğinde ise Galaktoz-1-P birikmez, sadece Galaktitol oluştuğu için tek bulgu yenidoğan kataraktıdır.',
+      trap: 'Klasik galaktozemide anne sütü KESİLİR; E. coli sepsisi riski yüksektir.' },
+
+    // --- 8. GLİKONEOJENEZ, CORİ & GLİKOZ-ALANİN (s.129-145) ---
+    { id: 'c34', topic: 'gng', page: 's.129-136', tag: '4 Bypass & Maliyet',
+      q: 'Glikoneojenezin 4 özel bypass enzimi, ana hız kısıtlayıcı enzimi ve 1 Glikoz için enerji maliyeti nedir?',
+      hint: '2 Piruvat → 1 Glikoz.',
+      a: '4 Bypass: Piruvat Karboksilaz (Biotin, mitokondri), PEPCK (GTP), Früktoz 1,6-bisfosfataz (ANA HIZ KISITLAYICI), Glikoz 6-fosfataz (ER). Maliyet: 4 ATP + 2 GTP (= 6~P) + 2 NADH.',
+      why: 'Karaciğer (%90) ve böbrekte (%10) yapılır. Kas hücresinde Glikoz 6-fosfataz olmadığı için kas glikoneojenezle kana glikoz veremez.',
+      trap: 'Biotin (B7) eksikliği (çiğ yumurta akı = avidin) Piruvat Karboksilazı bozar!' },
+    { id: 'c35', topic: 'gng', page: 's.145', tag: 'Resiprokal Kontrol',
+      q: 'Piruvat Karboksilazın ZORUNLU allosterik aktivatörü nedir? Früktoz 1,6-bisfosfatazı ne inhibe eder?',
+      hint: 'Yağ yıkımı artınca biriken 2C molekül + PFK-1’in aktivatörü.',
+      a: 'Piruvat Karboksilaz aktivatörü: Asetil-KoA (zorunlu!). Früktoz 1,6-bisfosfataz inhibitörleri: Früktoz 2,6-bisfosfat ve AMP (Sitrat ve ATP aktive eder).',
+      why: 'Açlıkta yağ asidi oksidasyonundan artan Asetil-KoA bir yandan PDH’yi kapatır, bir yandan Piruvat Karboksilazı açarak Piruvatı Glikoneojeneze yönlendirir!',
+      trap: 'Asetil-KoA glikoneojenezin SUBSTRATI değildir (karbon vermez), sadece AKTİVATÖRÜDÜR!' },
+    { id: 'c36', topic: 'gng', page: 's.137-144', tag: 'Cori, Alanin & Gliserol',
+      q: 'Cori Siklusu, Glikoz-Alanin Siklusu ve Gliserolün karaciğere taşıdığı substratlar nelerdir? Yağ dokusunda hangi enzim YOKTUR?',
+      hint: 'Laktat, Alanin (NH₂ taşır), Gliserol.',
+      a: 'Cori: Kas Laktatı (M₄-LDH) → KC (H₄-LDH, 6~P harcar). Glikoz-Alanin: Kas Alanini → KC (hem karbon hem NH₂/üreyi taşır). Yağ dokusunda GLİSEROKİNAZ yoktur; gliserol sadece karaciğerde glikoneojeneze girer.',
+      why: 'Yağ dokusu trigliserit omurgası olan Gliserol 3-P’ı yalnızca glikolizdeki DHAP’tan sentezleyebilir (PDF s.139).',
+      trap: 'Metformin karaciğer glikoneojenezini baskılayarak Tip 2 DM’de açlık kan şekerini düşürür.' },
+    { id: 'c37', topic: 'gng', page: 's.205', tag: 'Klinik — Alkol Hipoglisemisi',
+      q: 'Açlıkta aşırı alkol (etanol) tüketimi neden ağır HİPOGLİSEMİ ve LAKTİK ASİDOZ yapar?',
+      hint: 'Alkol DH ve Aldehit DH hangi koenzimi aşırı üretir?',
+      a: 'Etanol yıkımı karaciğerde NADH/NAD⁺ oranını patlatır → Piruvat Laktata, Oksalasetat Malata ve DHAP Gliserol-3-P’a kayar → Glikoneojenez kilitlenir!',
+      why: 'Açlıkta karaciğer glikojeni de tükendiği için kan şekeri hızla düşer (ADA Düzey 2: <54 mg/dL).',
+      trap: 'Tedavide IV Dekstroz verilmeden önce (veya birlikte) mutlaka Tiamin (B1) eklenir.' },
+
+    // --- 9. GLİKOJEN METABOLİZMASI & GSD (s.146-164) ---
+    { id: 'c38', topic: 'glg', page: 's.146-150', tag: 'Glikojenez',
+      q: 'Glikojen sentezini başlatan öncül protein hangisidir ve Glikojen Sentaz kaçıncı glikozdan itibaren devralır?',
+      hint: 'İlk 7 glikoz otokatalitik bağlanır.',
+      a: 'Öncül protein: GLİKOJENİN (ilk 7 glikozu kendine bağlar). Glikojen Sentaz 8. glikozdan itibaren α-(1,4) bağlarıyla zinciri uzatır.',
+      why: 'Glikoz 1-P + UTP → UDP-Glikoz (UDPG pirofosforilaz). Dallanma yapıcı enzim (Transglikozilaz) α-(1,6) dallarını oluşturur.',
+      trap: 'Glikojen Sentaz: Defosforile (I) = AKTİF | Fosforile (D) = İNAKTİF (G6P, D formunu bile allosterik aktive eder!).' },
+    { id: 'c39', topic: 'glg', page: 's.151-154', tag: 'Glikojenoliz',
+      q: 'Glikojen Fosforilazın vitamin kofaktörü nedir? Dallanma Kırıcı Enzimin 2 aktivitesi sonucunda ne açığa çıkar?',
+      hint: 'B6 vitamini + glikojenolizin %10’luk serbest ürünü.',
+      a: 'Glikojen Fosforilaz kofaktörü: Piridoksal Fosfat (PLP — Vitamin B6). Dallanma kırıcı enzim (Glukan transferaz + Amilo-1,6-glikozidaz) α-(1,6) bağını suyla kırarak SERBEST GLİKOZ (%10) çıkarır!',
+      why: 'Glikojenolizin ~%90’ı Glikoz 1-P (Fosforilaz ile, ATP tasarruflu), ~%10’u ise serbest glikozdur.',
+      trap: 'Glikojen Fosforilaz: Fosforile (a) = AKTİF | Defosforile (b) = İNAKTİF (Kasta AMP, b formunu bile aktive eder!).' },
+    { id: 'c40', topic: 'glg', page: 's.160-164', tag: '3 Hormonal Kaskad',
+      q: 'Fosforilaz Kinazın (αβγδ)₄ alt birimlerinin görevi nedir? Kasta hormon olmadan glikojenolizi ne başlatır?',
+      hint: 'δ alt birimi = Kalmodulin!',
+      a: 'γ = Katalitik; α,β = PKA fosforilasyon bölgesi; δ = Kalmodulin (Ca²⁺ bağlar). Kas kasılmasında salınan Ca²⁺ doğrudan δ (Kalmodulin)’e bağlanıp hormon olmadan glikojenolizi başlatır!',
+      why: '3 Kaskad (PDF s.162): (I) Adenilat siklaz/cAMP/PKA, (II) Sinir uyarısı/Ca²⁺, (III) Fosfoinozitol (IP₃/DAG/PKC). PKA ayrıca İnhibitör-1’i fosforilleyerek PP-1’i susturur. İnsülin Fosfodiesterazı ve PP-1’i aktive eder.',
+      trap: 'Kasta GLUKAGON reseptörü YOKTUR! Glukagon sadece karaciğeri, Epinefrin hem karaciğeri hem kası uyarır.' },
+    { id: 'c41', topic: 'glg', page: 's.155, 207', tag: 'GSD — Von Gierke vs McArdle',
+      q: 'Von Gierke (GSD Tip I), Pompe (Tip II), Cori (Tip III) ve McArdle (Tip V) hastalıklarının eksik enzimleri ve ayırt edici bulguları nelerdir?',
+      hint: 'Tip I = G6Paz, Tip II = Lizozom, Tip III = Dallanma kırıcı, Tip V = Kas fosforilazı.',
+      a: 'Tip I (Von Gierke — G6Paz): Ağır açlık hipoglisemisi, laktik asidoz, hiperürisemi, hiperlipidemi, hepatomegali | Tip II (Pompe — Lizozomal α-1,4-glikozidaz): Kardiyomegali (hipoglisemi YOK!) | Tip III (Cori — Dallanma kırıcı): Hafif hipoglisemi, normal laktat | Tip V (McArdle — Kas fosforilazı): Egzersizde kramp, miyoglobinüri, laktat YÜKSELMEZ, kan şekeri normal!',
+      why: 'Tip I’de hem glikojenoliz hem glikoneojenez kilitli olduğu için glukagon enjeksiyonuna kan şekeri yanıt vermez.',
+      trap: 'Tip VI (Hers) = Karaciğer glikojen fosforilazı eksikliğidir (McArdle ile karıştırma!).' },
+
+    // --- 10. HORMONLAR, DİYABET & HİPOGLİSEMİ (s.165-207 + ADA 2026) ---
+    { id: 'c42', topic: 'dm', page: 's.167-169', tag: 'İnsülin Yapısı',
+      q: 'İnsülinin yapısı nasıldır ve C-peptid ölçümü klinikte neyi ayırt etmede kullanılır?',
+      hint: 'A + B zinciri; dışarıdan iğne ile endojen üretim farkı.',
+      a: 'A zinciri (21 aa) + B zinciri (30 aa) disülfid bağlarıyla bağlıdır. C-peptid endojen insülinle 1:1 salınır: Ekzojen insülin uygulamasında C-peptid DÜŞÜK, insülinomada C-peptid YÜKSEKTİR.',
+      why: 'İnsülin dizisi belirlenen ilk protein hormon, RIA ile ölçülen ilk madde ve rekombinant DNA ile üretilen ilk ilaçtır (PDF s.167).',
+      trap: 'İnsülin kas ve yağ dokusuna GLUT-4 translokasyonuyla glikoz girişini artırır; beyin ve eritrosit insülinden bağımsızdır.' },
+    { id: 'c43', topic: 'dm', page: 's.181-183', tag: 'Karşıt Hormonlar',
+      q: 'Kan glikozunun AKUT kısa süreli ve UZUN SÜRELİ düzenlenmesini hangi insülin karşıtı hormonlar yapar? Kortizolün paradoksal etkisi nedir?',
+      hint: 'PDF s.181-183 tablosu.',
+      a: 'Akut kısa süreli: Glukagon (KC) & Epinefrin (KC+Kas) | Uzun süreli: Kortizol & Büyüme Hormonu. Kortizol glikoneojenezi ve kas proteolizini artırırken aynı zamanda karaciğer GLİKOJENEZİNİ de artırır!',
+      why: 'Addison (kortizol eksikliği) ve hipopituitarizm erişkinlerde açlık hipoglisemisi nedenidir.',
+      trap: 'Glukagon glikojenoliz(++), glikoneojenez(++), ketojenez ve lipolizi(++) artırır.' },
+    { id: 'c44', topic: 'dm', page: 's.192-193 (ADA 2026)', tag: 'DM Tanı Kriterleri',
+      q: 'Güncel ADA 2026 & PDF’ye göre Diabetes Mellitus’un 4 kesin tanı kriteri ve Prediyabet aralıkları nelerdir?',
+      hint: 'APG, OGTT 2.saat, HbA1c, Rastgele.',
+      a: 'DM: (1) APG ≥126 mg/dL, (2) 75g OGTT 2.saat ≥200 mg/dL, (3) HbA1c ≥%6,5, (4) Klasik semptom/kriz + rastgele ≥200 mg/dL. Prediyabet: APG 100–125 | OGTT 140–199 | HbA1c %5,7–6,4.',
+      why: 'Kapiller kan > vena kanı (%5–7); Plazma/serum > tam kan (%10–15) (PDF s.194).',
+      trap: 'Asemptomatik hastada kesin DM tanısı için 2 anormal test sonucu gerekir (ADA 2026).' },
+    { id: 'c45', topic: 'dm', page: 's.195-197', tag: 'HbA1c vs Fruktozamin',
+      q: 'HbA1c molekülünde glikoz tam nereye bağlanır? HbA1c ile Fruktozamin hangi zaman aralıklarını yansıtır?',
+      hint: 'β zinciri N-terminali; 8–10 hafta vs 1–2 hafta.',
+      a: 'Glikoz, HbA’nın β zincirlerinin N-terminalindeki VALİN amino asidine non-enzimatik bağlanır. HbA1c: 8–10 hafta (eritrosit ömrüne bağlı) | Fruktozamin (glike albümin): 1–2 hafta.',
+      why: 'Hemolitik anemi veya hemoglobinopatide eritrosit ömrü kısaldığından HbA1c yalancı düşük çıkar → Fruktozamin kullanılır!',
+      trap: 'Sağlıklı yetişkinde %96 HbA (2α-2β), %3 HbA₂, %1 HbF bulunur.' },
+    { id: 'c46', topic: 'dm', page: 's.198-200', tag: 'Ketonlar & Mikroalbüminüri',
+      q: 'Keton cisimlerinin kanda bulunma oranları (%) ve diyabetik nefropati erken göstergesi Mikroalbüminüri aralığı nedir?',
+      hint: 'En fazla β-hidroksibütirat; 30–300 mg/24 saat.',
+      a: 'Ketonlar: %78 β-Hidroksibütirat, %20 Asetoasetik asit, %2 Aseton. Mikroalbüminüri: 30–300 mg/24 saat (Normal <30; 6 ay içinde 3 ölçümün 2’sinde pozitif olmalı).',
+      why: 'Tip 1 DM’de insülinopeni → aşırı lipoliz → Asetil-KoA → Ketonemi/Ketonüri/DKA. Karaciğer keton üretir ama kendi kullanamaz.',
+      trap: 'Aseton en düşük orandadır (%2) ama uçucu olduğu için nefeste meyvemsi koku verir.' },
+    { id: 'c47', topic: 'dm', page: 's.201-207 (ADA 2026)', tag: 'Hipoglisemi Sınıflaması',
+      q: 'ADA 2026 Hipoglisemi düzeyleri (Düzey 1, 2, 3) ve Açlık vs Postprandial hipoglisemi zaman ayrımı nedir?',
+      hint: '70 mg/dL, 54 mg/dL; kahvaltı öncesi vs yemekten 2–4 saat sonra.',
+      a: 'Düzey 1: <70 mg/dL (glisemik faktörler ↑) | Düzey 2: <54 mg/dL (klinik anlamlı nöroglikopeni eşiği) | Düzey 3: Dış yardım gerektiren ağır tablo. Açlık: Kahvaltı öncesi/öğün atlayınca (insülinoma, alkol, Addison) | Postprandial: Yemekten 2–4 saat sonra (GİS cerrahisi, erken DM).',
+      why: 'PDF s.204 semptomları: Adrenerjik (çarpıntı, terleme, titreme, anksiyete) ve Nöroglikopenik (baş dönmesi, görme bozukluğu, konfüzyon, konvülsiyon, koma).',
+      trap: 'Yenidoğan hipoglisemileri (PDF s.207): Galaktozemi, HFI, GSD, diyabetik anne bebeği, lösin duyarlılığı!' },
+    // Ek yüksek verimli spotlar (48-55)
+    { id: 'c48', topic: 'glyc', page: 's.25', tag: 'ATP Kullanımı',
+      q: 'Hücrede üretilen ATP’nin 3 ana kullanım alanı ve yüzdeleri (PDF s.25) nelerdir?',
+      hint: 'Mekanik, ozmotik, kimyasal iş.',
+      a: '1) Mekanik iş — Kas kasılması (%60), 2) Ozmotik iş — İyon transportu (%30), 3) Kimyasal iş — Biyosentez (%10).',
+      why: 'ATP iki yolla üretilir: Oksidatif fosforilasyon (ETZ) ve Substrat düzeyinde fosforilasyon (PGK, PK, Süksinat tiyokinaz).',
+      trap: 'Metabolizmanın 3 temel amacı: ATP (enerji), NADPH (indirgeyici güç), Biyosentez yapı taşları.' },
+    { id: 'c49', topic: 'ppp', page: 's.120, 123', tag: 'Antioksidanlar',
+      q: 'Glutatyon (GSH) hangi 3 amino asitten oluşur? PDF s.120’deki metal bağlayan antioksidan proteinler hangileridir?',
+      hint: 'γ-Glu-Cys-Gly; demir ve bakır bağlayıcılar.',
+      a: 'GSH: Glutamat – Sistein – Glisin (2 ATP harcanarak sentezlenir; aktif grup Sisteinin -SH ucudur). Metal bağlayanlar: Ferritin, Transferrin, Haptoglobin, Seruloplazmin, Albümin.',
+      why: 'Serbest Fe²⁺ ve Cu⁺ Fenton reaksiyonunu katalizlediği için bu proteinler metalleri hapsederek radikal oluşumunu engeller.',
+      trap: 'Parasetamol zehirlenmesinde karaciğer GSH deposu tükenir; N-asetilsistein (NAC) sistein sağlayarak kurtarır.' },
+    { id: 'c50', topic: 'dm', page: 's.180, 188', tag: 'İnsülin vs DM',
+      q: 'Diabetes Mellitus’ta (insülin eksikliğinde) hangi 4 yolak AZALIR, hangi 4 yolak ARTAR (PDF s.180)?',
+      hint: 'Anabolik olanlar düşer, katabolik olanlar fırlar.',
+      a: 'AZALANLAR: Kas/yağ glikoz girişi, Glikoz oksidasyonu, Glikojenez, Lipojenez. ARTANLAR: Glikoneojenez, Glikojenoliz, Lipoliz, Keton cisimleri oluşumu.',
+      why: 'Bu tablo DM’nin üçlü klasik biyokimyasal sonucunu doğurur: HİPERGLİSEMİ + GLİKOZÜRİ + KETONEMİ.',
+      trap: 'İnsülin normalde bu 7 yolakta tam tersi yönde çalışır (anabolik hormon).' },
+    { id: 'c51', topic: 'gng', page: 's.133', tag: 'Malat Mekiği (GNG)',
+      q: 'Glikoneojenezde mitokondride Piruvat Karboksilazla oluşan Oksalasetat (OAA) sitozole nasıl taşınır?',
+      hint: 'OAA mitokondri iç zarından doğrudan geçemez!',
+      a: 'Mitokondriyal Malat Dehidrojenaz ile L-Malat’a indirgenir, Malat taşıyıcısıyla sitozole çıkar ve sitozolik Malat DH ile tekrar Oksalasetat’a oksitlenir.',
+      why: 'Bu süreç aynı zamanda mitokondriden sitozole glikoneojenezde (GAPDH’ın tersi için) gereken NADH eşdeğerini de taşır!',
+      trap: 'Sitozolde OAA ardından PEPCK (GTP harcar, CO₂ çıkarır) ile Fosfoenolpiruvata döner.' },
+    { id: 'c52', topic: 'glyc', page: 's.54-55', tag: 'Alkolik Fermantasyon',
+      q: 'Maya/mikroorganizmalardaki alkolik fermantasyonda Piruvat → Etanol dönüşümünün 2 enzimi nedir?',
+      hint: 'İnsanlarda ilk enzim yoktur.',
+      a: '1) Piruvat Dekarboksilaz (CO₂ çıkarır → Asetaldehit; TPP bağımlı), 2) Alkol Dehidrojenaz (NADH → NAD⁺, Asetaldehit → Etanol).',
+      why: 'Net kazanç yine 1 Glikoz → 2 Etanol + 2 CO₂ + 2 ATP (PDF s.55).',
+      trap: 'İnsanlarda Piruvat Dekarboksilaz yoktur; anaerobik son ürünümüz L-Laktattır.' },
+    { id: 'c53', topic: 'glg', page: 's.148', tag: 'Enerji Maliyeti',
+      q: 'Glikojenezde UDP-Glikoz sentezini termodinamik olarak geri dönüşümsüz (tek yönlü) yapan yan reaksiyon nedir?',
+      hint: 'UDPG Pirofosforilazdan çıkan PPi’ye ne olur?',
+      a: 'Oluşan pirofosfatın (PPi), Pirofosfataz enzimiyle anında 2 inorganik fosfata (2 Pi) hidroliz edilmesi.',
+      why: 'Aynı PPi → 2 Pi mekanizması Adenilat siklaz (cAMP sentezi, PDF s.38) ve yağ asidi aktivasyonunda da reaksiyonu tek yönlü kilitler.',
+      trap: 'Glikojen zincirine 1 glikoz eklemek toplam 2 yüksek enerjili fosfat bağına (1 ATP + 1 UTP) mal olur.' },
+    { id: 'c54', topic: 'tca', page: 's.70', tag: 'Krebs Ara Ürünü',
+      q: 'İzositrat Dehidrojenaz reaksiyonunda İzositrat ile α-Ketoglutarat arasında oluşan kararsız ara ürün hangisidir?',
+      hint: 'PDF s.70’te köşeli parantez içinde gösterilir.',
+      a: 'Oksalsüksinat (ardından CO₂ kaybederek α-Ketoglutarata döner).',
+      why: 'Benzer şekilde Sitrat sentazda Sitroil-KoA, Akonitazda ise Sis-Akonitat ara üründür (PDF s.68-70).',
+      trap: 'İzositrat DH reaksiyonu Krebs’teki İLK CO₂ çıkışı ve İLK NADH üretimidir.' }
+  ];
+
+  // =========================================================================
+  // 3. ÖLÇME & DEĞERLENDİRME SORU BANKASI (16 Klinik + Spot Sınav Sorusu)
+  // =========================================================================
+  const EXAM_BANK = [
+    { id: 'e01', topic: 'chem', q: 'Aşağıdaki monosakkaritlerden hangisinde asimetrik (kiral) karbon atomu BULUNMAZ?', opts: ['D-Gliseraldehit', 'Dihidroksiaseton', 'D-Riboz', 'D-Früktoz'], ans: 1, exp: 'Dihidroksiaseton simetrik yapılı ketotriozdur; 4 farklı gruba bağlı karbonu yoktur (PDF s.10).' },
+    { id: 'e02', topic: 'chem', q: 'Aşağıdaki disakkarit çiftlerinden hangilerinin HER İKİSİ DE indirgeyici (redüktan) DEĞİLDİR?', opts: ['Maltoz ve Laktoz', 'Sükroz ve Trehaloz', 'Laktoz ve Sellobioz', 'İzomaltoz ve Maltoz'], ans: 1, exp: 'Sükrozda α-(1,2), Trehalozda α-(1,1) bağı her iki anomerik karbonu kilitlediği için serbest asetal hidroksili yoktur (PDF s.15-18).' },
+    { id: 'e03', topic: 'digest', q: 'İnce bağırsakta glikoz ve galaktoz emilimini sağlayan SGLT-1 taşıyıcısı için aşağıdakilerden hangisi DOĞRUDUR?', opts: ['Früktozu da aynı hızda taşır', '2 Na⁺ ile sekonder aktif taşıma yapar ve Na⁺-K⁺ ATPaz gradyentine bağımlıdır', 'Bazolateral membranda yer alır', 'Akarboz tarafından doğrudan inhibe edilir'], ans: 1, exp: 'SGLT-1 apikal membranda 2 Na⁺ ile glikoz/galaktozu içeri alır; früktoz GLUT-5, kana geçiş ise GLUT-2 ile olur (PDF s.23).' },
+    { id: 'e04', topic: 'glyc', q: 'Açlıkta yükselen Glukagon, karaciğerde PKA aracılığıyla bifonksiyonel PFK-2 / FBPaz-2 enzimini fosforiller. Bunun doğrudan sonucu nedir?', opts: ['Früktoz 2,6-bisfosfat artar ve glikoliz hızlanır', 'Früktoz 2,6-bisfosfat azalır, PFK-1 frenlenir ve glikoneojenez açılır', 'Piruvat kinaz defosforile olup aktifleşir', 'Glikokinaz G6P ile inhibe olur'], ans: 1, exp: 'PKA fosforilasyonu FBPaz-2’yi aktif, PFK-2’yi inaktif yapar → F-2,6-BP düşer → PFK-1 yavaşlar, F-1,6-BPaz açılır (PDF s.36).' },
+    { id: 'e05', topic: 'glyc', q: 'Kan glikozu ölçüm tüpüne (gri tüp) konulan Sodyum Florür hangi glikolitik enzimi inhibe eder?', opts: ['Heksokinaz', 'Aldolaz', 'GAPDH', 'Enolaz'], ans: 3, exp: 'Florür, Mg²⁺ ile kompleks oluşturarak Enolazı (2-Fosfogliserat → PEP) inhibe eder.' },
+    { id: 'e06', topic: 'glyc', q: 'Eritrositlerde Rapoport-Luebering şantıyla 2,3-BPG üretiminin fizyolojik sonucu aşağıdakilerden hangisidir?', opts: ['Oksihemoglobin eğrisi sola kayar', 'PGK basamağındaki ATP üretimi atlanır ve dokulara O₂ bırakılması kolaylaşır', 'Net ATP kazancı 4’e çıkar', 'Methemoglobin oluşur'], ans: 1, exp: '2,3-BPG eğriyi sağa kaydırarak O₂’nin dokulara salınımını kolaylaştırır; bu sırada PGK basamağındaki ATP atlanır (PDF s.56).' },
+    { id: 'e07', topic: 'pdh', q: 'PDH kompleksinin kovalent düzenlenmesiyle ilgili aşağıdakilerden hangisi DOĞRUDUR?', opts: ['PDH Kinaz enzimi PDH’yi fosforilleyerek aktive eder', 'İnsülin ve Ca²⁺, PDH Fosfatazı uyararak PDH’yi defosforile (aktif) hale getirir', 'Yüksek Asetil-KoA ve NADH, PDH’yi aktive eder', 'Reaksiyon yüksek Piruvat varlığında tersine döner'], ans: 1, exp: 'PDH defosforile iken AKTİFTİR! İnsülin ve Ca²⁺ fosfatazı uyarır; Asetil-KoA/NADH/ATP ise kinazı uyararak PDH’yi kapatır (PDF s.66).' },
+    { id: 'e08', topic: 'tca', q: '1 mol glikozun karaciğer/kalp hücresinde 32 ATP, iskelet kasında 30 ATP vermesinin temel nedeni nedir?', opts: ['Kasta Süksinat DH’ın çalışmaması', 'Malat-Aspartat mekiğinin 2,5 ATP/NADH, Gliserol 3-P mekiğinin 1,5 ATP/NADH üretmesi', 'Kasta PDH’ın 1 NADH üretmesi', 'Karaciğerde PFK-1’in ATP harcamaması'], ans: 1, exp: 'Glikolizdeki 2 NADH, Malat-Aspartat ile +5 ATP (toplam 32), Gliserol 3-P ile +3 ATP (toplam 30) kazandırır (PDF s.79-82).' },
+    { id: 'e09', topic: 'tca', q: 'Aşağıdaki Krebs inhibitörü — hedef enzim eşleştirmelerinden hangisi YANLIŞTIR?', opts: ['Floroasetat (Florositrat) — Akonitaz', 'Arsenit — α-Ketoglutarat DH', 'Malonat — Süksinat Dehidrojenaz', 'Arsenat — Sitrat Sentaz'], ans: 3, exp: 'Arsenat glikolizde GAPDH’da Pi yerine geçer; Sitrat sentaz inhibitörü değildir.' },
+    { id: 'e10', topic: 'ppp', q: 'Akdenizli 8 yaşındaki erkek çocuk bakla yedikten 24 saat sonra sarılık, koyu idrar ve periferik yaymada Heinz cisimcikleri ile geliyor. Temel patogenez nedir?', opts: ['Eritrositlerde ATP sentezinin sıfırlanması', 'G6PD eksikliğine bağlı NADPH yetersizliği ve glutatyonun yenilenememesi', 'Transketolaz eksikliği', '2,3-BPG artışı'], ans: 1, exp: 'G6PD eksikliğinde oksidan stresle NADPH yetmez, GSH tükenir, hemoglobin denatüre olup Heinz cisimcikleri yapar ve hemoliz gelişir (PDF s.110-111).' },
+    { id: 'e11', topic: 'other', q: 'İlk 5 ay anne sütüyle sağlıklı büyüyen bebek, 6. ayda meyve suyu ve sükrozlu mamaya geçince kusma ve ağır hipoglisemi geliştiriyor. İdrarda indirgeyici şeker (+), glikoz oksidaz (-). Eksik enzim hangisidir?', opts: ['Früktokinaz', 'Aldolaz B', 'GALT', 'Glikoz 6-fosfataz'], ans: 1, exp: 'Herediter Früktoz İntoleransı (Aldolaz B eksikliği): F-1-P birikir, Pi/ATP tükenir → ağır hipoglisemi. Früktokinaz eksikliği ise benigndir (PDF s.127).' },
+    { id: 'e12', topic: 'other', q: 'Kontrolsüz diyabetli hastada lens liflerinde ozmotik şişme ve katarakt gelişiminden sorumlu yolak ve metabolit hangisidir?', opts: ['Üronik asit yolu — UDP-Glikuronat', 'Poliol yolu — Aldoz redüktaz / Sorbitol', 'Pentoz fosfat yolu — Riboz 5-P', 'Cori siklusu — Laktat'], ans: 1, exp: 'Hiperglisemide lenste Aldoz redüktaz glikozu Sorbitole çevirir; Sorbitol DH az olduğundan Sorbitol birikip su çeker (PDF s.127).' },
+    { id: 'e13', topic: 'gng', q: 'Açlıkta aşırı alkol alan bir kişide ağır hipoglisemi gelişmesinin biyokimyasal nedeni nedir?', opts: ['Alkolün Glikoz 6-fosfatazı yıkması', 'NADH/NAD⁺ oranının aşırı artmasıyla Piruvat→Laktat ve OAA→Malat kaymasının glikoneojenezi kilitlemesi', 'Asetil-KoA’nın Piruvat karboksilazı inhibe etmesi', 'Alkolün insülin salgılatması'], ans: 1, exp: 'Etanol yıkımı karaciğerde muazzam NADH üretir ve NAD⁺ gerektiren glikoneojenez girişlerini tersine çevirir.' },
+    { id: 'e14', topic: 'glg', q: '20 yaşındaki hastada egzersizle baldır krampları ve koyu idrar (miyoglobinüri) oluyor; iskemik egzersizde kan laktatı YÜKSELMİYOR ve açlık kan şekeri normal. Tanı nedir?', opts: ['Von Gierke (Tip I)', 'Pompe (Tip II)', 'Cori (Tip III)', 'McArdle (Tip V — Kas Glikojen Fosforilazı)'], ans: 3, exp: 'McArdle (GSD Tip V): Kas glikojenini yıkamadığı için laktat artmaz; karaciğer sağlam olduğundan hipoglisemi olmaz.' },
+    { id: 'e15', topic: 'dm', q: 'Hemolitik anemisi olan bir diyabet hastasında son 1–2 haftalık kan glikozu ortalamasını değerlendirmek için en uygun test hangisidir?', opts: ['HbA1c', 'Fruktozamin (Glike serum albümini)', 'Açlık ketonu', 'Serum amilaz'], ans: 1, exp: 'Hemolitik anemide eritrosit ömrü kısaldığından HbA1c yalancı düşük çıkar; Fruktozamin 1–2 haftalık glisemiyi yansıtır (PDF s.197).' },
+    { id: 'e16', topic: 'dm', q: 'Güncel ADA 2026 kılavuzuna göre klinik olarak anlamlı Düzey 2 Hipoglisemi eşiği ve kanda en yüksek oranda (%78) bulunan keton cismi sırasıyla hangisidir?', opts: ['<70 mg/dL — Aseton', '<54 mg/dL — β-Hidroksibütirat', '<60 mg/dL — Asetoasetat', '<45 mg/dL — Aseton'], ans: 1, exp: 'ADA 2026: Düzey 1 <70 mg/dL, Düzey 2 <54 mg/dL. Ketonların %78’i β-hidroksibütirat, %20’si asetoasetat, %2’si asetondur (PDF s.198).' }
+  ];
+
+  // =========================================================================
+  // 4. SM-2 ALGORİTMASI & KİŞİSEL HAFIZA LİNKİ (ENCODE / DECODE)
+  // =========================================================================
+  const STORAGE_KEY = 'kh_anki_pro_v1';
+
+  const state = {
+    activeTab: 'anki', // 'anki' | 'turbo' | 'exam' | 'stats'
+    darkMode: false,
+    topicFilter: 'all',
+    showHint: false,
+    flipped: false,
+    currentCardId: null,
+
+    // SM-2 verisi: { [cardId]: { reps, interval (gün), ef, due (timestamp ms), lapses, lastRating } }
+    srs: {},
+    // Gelişim geçmişi: [{ label, reviewed, accuracy }]
+    history: [],
+    examHistory: [], // [{ date, score, total, pct, topicBreakdown }]
+    streakDays: 1,
+    totalReviews: 0,
+    correctReviews: 0,
+
+    // Hızlı Tekrar (Turbo)
+    turboFilter: 'all', // 'all' | 'weak' | topicId
+    turboIndex: 0,
+    turboRevealed: false,
+    turboSessionCount: 0,
+
+    // Ölçme & Değerlendirme
+    examActive: false,
+    examFinished: false,
+    examTopic: 'all',
+    examSize: 10,
+    examQuestions: [],
+    examIndex: 0,
+    examAnswers: {}, // qId: chosenIdx
+    examStartTime: null,
+    examElapsedSec: 0,
+
+    // Hafıza Linki Modal
+    syncModalOpen: false,
+    importCodeInput: ''
+  };
+
+  function getCardSRS(id) {
+    return state.srs[id] || { reps: 0, interval: 0, ef: 2.5, due: 0, lapses: 0, lastRating: null };
+  }
+
+  // Gerçek SM-2 algoritması (1=Tekrar, 2=Zor, 3=İyi, 4=Kolay)
+  function applySM2(cardId, quality) {
+    const now = Date.now();
+    const d = { ...getCardSRS(cardId) };
+    const DAY = 86400000;
+
+    if (quality === 1) {
+      d.reps = 0;
+      d.interval = 0.0007; // ~1 dk
+      d.lapses += 1;
+      d.ef = Math.max(1.3, d.ef - 0.2);
+      d.due = now + 60000;
+    } else if (quality === 2) {
+      d.reps = Math.max(1, d.reps);
+      d.interval = d.interval < 0.5 ? 0.5 : Number((d.interval * 1.2).toFixed(2));
+      d.ef = Math.max(1.3, d.ef - 0.15);
+      d.due = now + d.interval * DAY;
+    } else if (quality === 3) {
+      if (d.reps === 0) d.interval = 1;
+      else if (d.reps === 1) d.interval = 3;
+      else d.interval = Number((d.interval * d.ef).toFixed(1));
+      d.reps += 1;
+      d.due = now + d.interval * DAY;
+    } else {
+      if (d.reps === 0) d.interval = 4;
+      else d.interval = Number((Math.max(4, d.interval * d.ef * 1.3)).toFixed(1));
+      d.reps += 1;
+      d.ef = Math.min(3.0, d.ef + 0.15);
+      d.due = now + d.interval * DAY;
+    }
+    d.lastRating = quality;
+    state.srs[cardId] = d;
+
+    state.totalReviews += 1;
+    if (quality >= 3) state.correctReviews += 1;
+    recordProgressPoint();
+    saveLocal();
+    return d;
+  }
+
+  function previewInterval(cardId, quality) {
+    const d = getCardSRS(cardId);
+    if (quality === 1) return '1 dk';
+    if (quality === 2) return d.interval < 0.5 ? '12 sa' : `${Math.max(1, Math.round(d.interval * 1.2))} gün`;
+    if (quality === 3) return d.reps === 0 ? '1 gün' : d.reps === 1 ? '3 gün' : `${Math.round(d.interval * d.ef)} gün`;
+    return d.reps === 0 ? '4 gün' : `${Math.round(Math.max(4, d.interval * d.ef * 1.3))} gün`;
+  }
+
+  function recordProgressPoint() {
+    const label = `Tur ${state.history.length + 1}`;
+    const acc = state.totalReviews ? Math.round((state.correctReviews / state.totalReviews) * 100) : 0;
+    const mastered = CARDS.filter(c => getCardSRS(c.id).reps >= 2).length;
+    if (state.totalReviews % 3 === 1 || state.history.length === 0) {
+      state.history.push({ label, reviewed: state.totalReviews, accuracy: acc, mastered });
+      if (state.history.length > 20) state.history.shift();
+    } else {
+      const last = state.history[state.history.length - 1];
+      last.reviewed = state.totalReviews;
+      last.accuracy = acc;
+      last.mastered = mastered;
+    }
+  }
+
+  // Kişisel Hafıza Linki Kodlama & Çözme (Kompakt Base64 JSON)
+  function generateMemoryCode() {
+    const compactSrs = {};
+    Object.entries(state.srs).forEach(([k, v]) => {
+      compactSrs[k] = [v.reps, Number(v.interval.toFixed(2)), Number(v.ef.toFixed(2)), Math.round(v.due / 60000), v.lapses, v.lastRating];
+    });
+    const payload = {
+      v: 1,
+      s: compactSrs,
+      r: [state.totalReviews, state.correctReviews, state.streakDays],
+      h: state.history.slice(-12),
+      e: state.examHistory.slice(-10)
+    };
+    const json = JSON.stringify(payload);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    return `KHMEM-${b64}`;
+  }
+
+  function generateMemoryLink() {
+    const code = generateMemoryCode();
+    try {
+      const base = window.location.href.split('#')[0];
+      if (base.startsWith('http')) return `${base}#mem=${code}`;
+    } catch (_) {}
+    return `https://karbonhidrat-anki.local/#mem=${code}`;
+  }
+
+  function loadFromMemoryString(rawInput) {
+    try {
+      let str = (rawInput || '').trim();
+      if (str.includes('#mem=')) str = str.split('#mem=')[1].trim();
+      if (str.startsWith('KHMEM-')) str = str.slice(6);
+      const json = decodeURIComponent(escape(atob(str)));
+      const data = JSON.parse(json);
+      if (!data || data.v !== 1) throw new Error('Geçersiz format');
+      const restored = {};
+      Object.entries(data.s || {}).forEach(([k, arr]) => {
+        restored[k] = { reps: arr[0], interval: arr[1], ef: arr[2], due: arr[3] * 60000, lapses: arr[4], lastRating: arr[5] };
+      });
+      state.srs = restored;
+      if (Array.isArray(data.r)) {
+        state.totalReviews = data.r[0] || 0;
+        state.correctReviews = data.r[1] || 0;
+        state.streakDays = data.r[2] || 1;
+      }
+      if (Array.isArray(data.h)) state.history = data.h;
+      if (Array.isArray(data.e)) state.examHistory = data.e;
+      saveLocal();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function saveLocal() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        srs: state.srs,
+        history: state.history,
+        examHistory: state.examHistory,
+        totalReviews: state.totalReviews,
+        correctReviews: state.correctReviews,
+        streakDays: state.streakDays,
+        darkMode: state.darkMode
+      }));
+    } catch (_) {}
+  }
+
+  function loadLocal() {
+    // 1. URL hash içinde #mem= varsa önce oradan yükle!
+    try {
+      if (window.location.hash && window.location.hash.includes('mem=')) {
+        if (loadFromMemoryString(window.location.hash)) {
+          showToast('Kişisel Hafıza Linkinden kaldığın yer yüklendi!', 'emerald');
+          return;
+        }
+      }
+    } catch (_) {}
+    // 2. Yoksa localStorage
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p.srs) state.srs = p.srs;
+        if (p.history) state.history = p.history;
+        if (p.examHistory) state.examHistory = p.examHistory;
+        if (typeof p.totalReviews === 'number') state.totalReviews = p.totalReviews;
+        if (typeof p.correctReviews === 'number') state.correctReviews = p.correctReviews;
+        if (typeof p.streakDays === 'number') state.streakDays = p.streakDays;
+        if (typeof p.darkMode === 'boolean') state.darkMode = p.darkMode;
+      }
+    } catch (_) {}
+  }
+
+  function applyTheme() {
+    document.documentElement.classList.toggle('dark', state.darkMode);
+    const btn = document.getElementById('theme-btn');
+    if (btn) btn.textContent = state.darkMode ? '☀️' : '🌙';
+  }
+
+  function showToast(msg, tone = 'indigo') {
+    const box = document.getElementById('toast-box');
+    if (!box) return;
+    const cls = {
+      indigo: 'bg-indigo-600 text-white',
+      emerald: 'bg-emerald-600 text-white',
+      rose: 'bg-rose-600 text-white',
+      amber: 'bg-amber-600 text-white'
+    }[tone] || 'bg-indigo-600 text-white';
+    const el = document.createElement('div');
+    el.className = `px-3.5 py-2 rounded-xl shadow-lg text-xs font-bold fade-in ${cls}`;
+    el.textContent = msg;
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  function copyText(text, successMsg) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => showToast(successMsg, 'emerald')).catch(() => fallbackCopy(text, successMsg));
+    } else {
+      fallbackCopy(text, successMsg);
+    }
+  }
+  function fallbackCopy(text, successMsg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast(successMsg, 'emerald'); } catch (_) {}
+    ta.remove();
+  }
+
+  function exportAnkiTSV() {
+    const rows = CARDS.map(c => {
+      const topicName = TOPICS.find(t => t.id === c.topic)?.name || c.topic;
+      const front = `[${topicName} • ${c.tag}] ${c.q}`.replace(/\t|\n/g, ' ');
+      const back = `<b>${c.a}</b><br><br><i>Mekanizma:</i> ${c.why}<br><i>Sınav Tuzağı:</i> ${c.trap} (${c.page})`.replace(/\t|\n/g, ' ');
+      return `${front}\t${back}\tkarbonhidrat_${c.topic}`;
+    });
+    const blob = new Blob([rows.join('\n')], { type: 'text/tab-separated-values;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'karbonhidrat_metabolizmasi_anki_destesi.tsv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Anki .tsv dosyası indirildi! (Anki > İçe Aktar)', 'emerald');
+  }
+
+  // =========================================================================
+  // 5. KUYRUK VE METRİK HESAPLAMALARI
+  // =========================================================================
+  function getTopicName(id) {
+    return TOPICS.find(t => t.id === id)?.name || id;
+  }
+
+  function getAnkiQueue() {
+    const now = Date.now();
+    const pool = CARDS.filter(c => state.topicFilter === 'all' || c.topic === state.topicFilter);
+    const due = pool.filter(c => {
+      const s = getCardSRS(c.id);
+      return s.reps > 0 && s.due <= now;
+    }).sort((a, b) => getCardSRS(a.id).due - getCardSRS(b.id).due);
+
+    const fresh = pool.filter(c => getCardSRS(c.id).reps === 0 && getCardSRS(c.id).lastRating === null);
+    const learning = pool.filter(c => getCardSRS(c.id).reps === 0 && getCardSRS(c.id).lastRating === 1);
+    const future = pool.filter(c => getCardSRS(c.id).reps > 0 && getCardSRS(c.id).due > now)
+      .sort((a, b) => getCardSRS(a.id).due - getCardSRS(b.id).due);
+
+    return { pool, due, fresh, learning, ordered: [...learning, ...due, ...fresh, ...future] };
+  }
+
+  function pickNextAnkiCard() {
+    const q = getAnkiQueue();
+    if (!q.ordered.length) { state.currentCardId = null; return null; }
+    if (state.currentCardId && q.ordered.some(c => c.id === state.currentCardId)) {
+      return q.ordered.find(c => c.id === state.currentCardId);
+    }
+    state.currentCardId = q.ordered[0].id;
+    return q.ordered[0];
+  }
+
+  function computeMetrics() {
+    const total = CARDS.length;
+    const studied = CARDS.filter(c => getCardSRS(c.id).lastRating !== null).length;
+    const mastered = CARDS.filter(c => getCardSRS(c.id).reps >= 2 || getCardSRS(c.id).interval >= 3).length;
+    const weak = CARDS.filter(c => getCardSRS(c.id).lastRating === 1 || getCardSRS(c.id).lapses > 0).length;
+    const now = Date.now();
+    const dueNow = CARDS.filter(c => {
+      const s = getCardSRS(c.id);
+      return s.lastRating === null || s.due <= now;
+    }).length;
+
+    // Ortalama hafıza stabilitesi S (gün cinsinden): tekrarsız bazal S=1.2 gün, tekrarlı kartlarda interval'e göre artar
+    let sumStability = 0;
+    let counted = 0;
+    CARDS.forEach(c => {
+      const s = getCardSRS(c.id);
+      if (s.lastRating !== null) {
+        sumStability += Math.max(0.8, s.interval * 1.45 + s.reps * 1.2);
+        counted += 1;
+      }
+    });
+    const avgStability = counted > 0 ? Number((sumStability / counted).toFixed(2)) : 1.5;
+    const retention7d = Math.round(Math.exp(-7 / avgStability) * 100);
+    const accuracy = state.totalReviews ? Math.round((state.correctReviews / state.totalReviews) * 100) : 0;
+
+    // Konu bazlı hakimiyet
+    const topicStats = TOPICS.map(t => {
+      const tc = CARDS.filter(c => c.topic === t.id);
+      const tStudied = tc.filter(c => getCardSRS(c.id).lastRating !== null).length;
+      const tMastered = tc.filter(c => getCardSRS(c.id).reps >= 2 || getCardSRS(c.id).lastRating === 4).length;
+      const pct = tc.length ? Math.round(((tMastered + (tStudied - tMastered) * 0.4) / tc.length) * 100) : 0;
+      return { ...t, total: tc.length, studied: tStudied, mastered: tMastered, pct };
+    });
+
+    const examAvg = state.examHistory.length
+      ? Math.round(state.examHistory.reduce((a, b) => a + b.pct, 0) / state.examHistory.length)
+      : null;
+
+    return { total, studied, mastered, weak, dueNow, avgStability, retention7d, accuracy, topicStats, examAvg };
+  }
+
+  // =========================================================================
+  // 6. GÖRÜNÜM RENDER FONKSİYONLARI
+  // =========================================================================
+
+  function renderAnki() {
+    const q = getAnkiQueue();
+    const card = pickNextAnkiCard();
+    const m = computeMetrics();
+
+    return `
+      <div class="max-w-4xl mx-auto space-y-4 fade-in">
+        <!-- Üst Özet & Konu Filtresi -->
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2.5 py-1 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 font-bold mono">Tekrar: ${q.learning.length + q.due.length}</span>
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold mono">Yeni: ${q.fresh.length}</span>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold mono">Usta: ${m.mastered}/${m.total}</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <select data-action="anki-topic-filter" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold">
+              <option value="all" ${state.topicFilter === 'all' ? 'selected' : ''}>Tüm Konular (${CARDS.length} Spot Kart)</option>
+              ${TOPICS.map(t => {
+                const cnt = CARDS.filter(c => c.topic === t.id).length;
+                return `<option value="${t.id}" ${state.topicFilter === t.id ? 'selected' : ''}>${t.name} (${cnt})</option>`;
+              }).join('')}
+            </select>
+            <button data-action="export-tsv" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold" title="Anki uygulamasına aktar">
+              ⬇ Anki .tsv
+            </button>
+          </div>
+        </div>
+
+        ${card ? `
+          <!-- Ana Öğretici Anki Kartı -->
+          <div class="rounded-3xl bg-white dark:bg-slate-900 border-2 shadow-sm overflow-hidden transition ${
+            state.flipped ? 'border-emerald-400 dark:border-emerald-700' : 'border-indigo-200 dark:border-indigo-800'
+          }">
+            <!-- Kart Üst Bar -->
+            <div class="px-5 py-3 bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full font-extrabold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">${getTopicName(card.topic)}</span>
+                <span class="px-2 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">${card.tag}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-500 mono">
+                <span>PDF ${card.page}</span>
+                <span>•</span>
+                <span>Tekrar: ${getCardSRS(card.id).reps}</span>
+              </div>
+            </div>
+
+            <!-- Soru Alanı -->
+            <div class="p-6 sm:p-8 space-y-5">
+              <div>
+                <div class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2">❓ Sınav Spot Sorusu</div>
+                <p class="text-base sm:text-xl font-extrabold leading-relaxed text-slate-900 dark:text-white">${card.q}</p>
+              </div>
+
+              <!-- Kademeli İpucu (Scaffolding) -->
+              ${!state.flipped ? `
+                <div class="pt-1">
+                  ${state.showHint ? `
+                    <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs sm:text-sm text-amber-900 dark:text-amber-200 fade-in">
+                      <strong>💡 İpucu:</strong> ${card.hint}
+                    </div>
+                  ` : `
+                    <button data-action="show-hint" class="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:bg-amber-100 transition">
+                      💡 Hafif İpucu Göster (Takıldıysan)
+                    </button>
+                  `}
+                </div>
+              ` : `
+                <!-- Cevap & Öğretici Katman -->
+                <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 fade-in">
+                  <div class="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 mb-1">✅ Net Spot Cevap</div>
+                    <p class="text-sm sm:text-base font-extrabold text-emerald-950 dark:text-emerald-100 leading-relaxed">${card.a}</p>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-800/50">
+                      <div class="text-[11px] font-extrabold text-indigo-700 dark:text-indigo-300 mb-1">🧠 Neden? (Öğretici Mekanizma)</div>
+                      <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${card.why}</p>
+                    </div>
+                    <div class="p-3.5 rounded-2xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-800/50">
+                      <div class="text-[11px] font-extrabold text-rose-700 dark:text-rose-300 mb-1">⚠️ Sınav / Komite Tuzağı</div>
+                      <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${card.trap}</p>
+                    </div>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <!-- Alt Eylem Çubuğu -->
+            <div class="px-5 py-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200/80 dark:border-slate-800">
+              ${!state.flipped ? `
+                <button data-action="flip-anki" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold shadow-sm transition">
+                  Cevabı Göster (Boşluk Tuşu)
+                </button>
+              ` : `
+                <div class="space-y-2">
+                  <div class="text-center text-[11px] font-semibold text-slate-500">Bu bilgiyi ne kadar rahat hatırladın? (SM-2 Unutma Eğrini günceller)</div>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button data-action="rate-anki" data-q="1" class="py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white transition flex flex-col items-center">
+                      <span class="text-xs font-extrabold">1 • Tekrar</span>
+                      <span class="text-[10px] opacity-90 mono">${previewInterval(card.id, 1)}</span>
+                    </button>
+                    <button data-action="rate-anki" data-q="2" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white transition flex flex-col items-center">
+                      <span class="text-xs font-extrabold">2 • Zor</span>
+                      <span class="text-[10px] opacity-90 mono">${previewInterval(card.id, 2)}</span>
+                    </button>
+                    <button data-action="rate-anki" data-q="3" class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition flex flex-col items-center">
+                      <span class="text-xs font-extrabold">3 • İyi</span>
+                      <span class="text-[10px] opacity-90 mono">${previewInterval(card.id, 3)}</span>
+                    </button>
+                    <button data-action="rate-anki" data-q="4" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition flex flex-col items-center">
+                      <span class="text-xs font-extrabold">4 • Kolay</span>
+                      <span class="text-[10px] opacity-90 mono">${previewInterval(card.id, 4)}</span>
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+          </div>
+          <p class="text-center text-[11px] text-slate-400">Klavye kısayolları: <strong>Boşluk</strong> = Cevabı aç &nbsp;|&nbsp; <strong>1–4</strong> = SM-2 puanla &nbsp;|&nbsp; <strong>H</strong> = İpucu</p>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function getTurboPool() {
+    if (state.turboFilter === 'all') return CARDS;
+    if (state.turboFilter === 'weak') {
+      const w = CARDS.filter(c => {
+        const s = getCardSRS(c.id);
+        return s.lastRating === 1 || s.lastRating === 2 || s.lapses > 0;
+      });
+      return w.length ? w : CARDS;
+    }
+    return CARDS.filter(c => c.topic === state.turboFilter);
+  }
+
+  function renderTurbo() {
+    const pool = getTurboPool();
+    const safeIdx = pool.length ? (state.turboIndex % pool.length + pool.length) % pool.length : 0;
+    const card = pool[safeIdx];
+
+    return `
+      <div class="max-w-3xl mx-auto space-y-4 fade-in">
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-sm flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold">⚡ Hızlı Tekrar (Sınav Öncesi Turbo Spot Turu)</h2>
+            <p class="text-xs text-amber-50">Uzun açıklamalarla zaman kaybetmeden sadece net soru → spot cevap akışıyla seri tarama yap.</p>
+          </div>
+          <span class="mono text-xs font-extrabold px-3 py-1 rounded-xl bg-black/20">Taranan: ${state.turboSessionCount}</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button data-action="turbo-filter" data-val="all" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${state.turboFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'}">Tümü (${CARDS.length})</button>
+          <button data-action="turbo-filter" data-val="weak" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${state.turboFilter === 'weak' ? 'bg-rose-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'}">🔥 Sadece Zayıf / Zorlandıklarım</button>
+          <select data-action="turbo-topic-select" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold">
+            <option value="all" ${state.turboFilter === 'all' ? 'selected' : ''}>Konu Seç…</option>
+            ${TOPICS.map(t => `<option value="${t.id}" ${state.turboFilter === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+          </select>
+        </div>
+
+        ${card ? `
+          <div data-action="turbo-flip" class="cursor-pointer p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border-2 shadow-sm min-h-[240px] flex flex-col justify-between transition ${
+            state.turboRevealed ? 'border-emerald-400 dark:border-emerald-700' : 'border-amber-300 dark:border-amber-700'
+          }">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-indigo-600 dark:text-indigo-400">${getTopicName(card.topic)} • ${card.tag}</span>
+              <span class="mono font-bold text-slate-400">${safeIdx + 1} / ${pool.length}</span>
+            </div>
+
+            <div class="my-5 space-y-3">
+              <p class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-relaxed">${card.q}</p>
+              ${state.turboRevealed ? `
+                <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 fade-in">
+                  <div class="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">⚡ SPOT CEVAP</div>
+                  <p class="text-sm sm:text-base font-extrabold text-emerald-950 dark:text-emerald-100">${card.a}</p>
+                  <p class="text-xs text-rose-700 dark:text-rose-300 mt-2"><strong>Tuzak:</strong> ${card.trap}</p>
+                </div>
+              ` : `
+                <div class="text-xs font-semibold text-amber-600 dark:text-amber-400">Cevabı görmek için karta tıkla…</div>
+              `}
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex justify-between">
+              <span>PDF ${card.page}</span>
+              <span>${state.turboRevealed ? 'Aşağıdan tek tıkla geç' : 'Tıkla & Gör'}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <button data-action="turbo-mark" data-ok="0" class="py-3 rounded-xl bg-rose-100 dark:bg-rose-950/70 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs sm:text-sm font-extrabold hover:bg-rose-200 transition">
+              🔁 Unutmuşum (Zayıflara Ekle)
+            </button>
+            <button data-action="turbo-mark" data-ok="1" class="py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-extrabold shadow-sm transition">
+              ✅ Biliyorum (Hızlı Geç ▶)
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function renderExam() {
+    if (!state.examActive && !state.examFinished) {
+      return `
+        <div class="max-w-3xl mx-auto space-y-4 fade-in">
+          <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+            <div>
+              <span class="px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold">📝 ÖLÇME &amp; DEĞERLENDİRME MERKEZİ</span>
+              <h2 class="text-xl font-extrabold mt-2">Kendini Gerçek Komite / TUS Sorularıyla Sına</h2>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Sınav sonunda konu bazlı başarı karnen çıkarılır, gelişim eğrine kaydedilir ve yanlış yaptığın konuların Anki kartları tek tıkla açılır.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label class="font-extrabold block">Konu Kapsamı</label>
+                <select data-action="exam-topic" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-semibold">
+                  <option value="all" ${state.examTopic === 'all' ? 'selected' : ''}>Karışık Tüm Konular (${EXAM_BANK.length} Soru)</option>
+                  ${TOPICS.map(t => `<option value="${t.id}" ${state.examTopic === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label class="font-extrabold block">Soru Sayısı</label>
+                <div class="flex gap-2">
+                  ${[5, 10, 16].map(n => `
+                    <button data-action="exam-size" data-val="${n}" class="flex-1 py-2 rounded-xl font-extrabold border transition ${
+                      state.examSize === n ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700'
+                    }">${n === 16 ? 'Tümü (16)' : `${n} Soru`}</button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <button data-action="start-exam" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold shadow-sm transition">
+              🚀 Sınavı Başlat
+            </button>
+
+            ${state.examHistory.length > 0 ? `
+              <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Geçmiş Denemelerin</div>
+                <div class="space-y-1.5">
+                  ${state.examHistory.slice(-5).reverse().map(h => `
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs">
+                      <span class="font-semibold">${h.date}</span>
+                      <span class="mono font-extrabold ${h.pct >= 80 ? 'text-emerald-600' : h.pct >= 60 ? 'text-amber-600' : 'text-rose-600'}">${h.score}/${h.total} (%${h.pct})</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    if (state.examFinished) {
+      const qs = state.examQuestions;
+      let correct = 0;
+      const byTopic = {};
+      qs.forEach(q => {
+        if (!byTopic[q.topic]) byTopic[q.topic] = { ok: 0, total: 0 };
+        byTopic[q.topic].total += 1;
+        if (state.examAnswers[q.id] === q.ans) {
+          correct += 1;
+          byTopic[q.topic].ok += 1;
+        }
+      });
+      const pct = qs.length ? Math.round((correct / qs.length) * 100) : 0;
+      const level = pct >= 85 ? '🏆 İleri Düzey (Sınava Hazır)' : pct >= 65 ? '📈 Orta-İyi (Eksikleri Kapat)' : '🔁 Temel Düzey (Anki Tekrarı Şart)';
+
+      return `
+        <div class="max-w-3xl mx-auto space-y-4 fade-in">
+          <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400">ÖLÇME &amp; DEĞERLENDİRME KARNESİ</div>
+                <h2 class="text-2xl font-extrabold mt-0.5">${correct} / ${qs.length} Doğru (%${pct})</h2>
+                <p class="text-xs font-bold text-slate-500 mt-1">${level} • Süre: ${state.examElapsedSec} sn</p>
+              </div>
+              <div class="flex gap-2">
+                <button data-action="set-tab" data-tab="stats" class="px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-bold">📈 Eğrileri Gör</button>
+                <button data-action="reset-exam" class="px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Yeni Sınav</button>
+              </div>
+            </div>
+
+            <!-- Konu Bazlı Başarı -->
+            <div class="space-y-2">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Konu Bazlı Performans &amp; Hızlı Kurtarma</div>
+              ${Object.entries(byTopic).map(([tid, st]) => {
+                const tp = Math.round((st.ok / st.total) * 100);
+                return `
+                  <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span class="font-bold">${getTopicName(tid)}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="mono font-extrabold ${tp >= 80 ? 'text-emerald-600' : 'text-rose-600'}">${st.ok}/${st.total} (%${tp})</span>
+                      ${tp < 100 ? `<button data-action="jump-topic-anki" data-topic="${tid}" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-bold">Anki’de Çalış →</button>` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Soru Soru Çözüm İncelemesi -->
+            <div class="space-y-2.5 pt-2">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Detaylı Çözüm Anahtarı</div>
+              ${qs.map((q, idx) => {
+                const userAns = state.examAnswers[q.id];
+                const ok = userAns === q.ans;
+                return `
+                  <div class="p-3.5 rounded-2xl border text-xs ${ok ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900' : 'bg-rose-50/60 dark:bg-rose-950/25 border-rose-200 dark:border-rose-900'}">
+                    <div class="font-bold mb-1">${ok ? '✅' : '❌'} ${idx + 1}. ${q.q}</div>
+                    <div class="text-slate-600 dark:text-slate-300"><strong>Doğru Cevap:</strong> ${q.opts[q.ans]}</div>
+                    <div class="text-slate-600 dark:text-slate-300 mt-1">${q.exp}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Aktif sınav ekranı
+    const q = state.examQuestions[state.examIndex];
+    const chosen = state.examAnswers[q.id];
+    const answeredCount = Object.keys(state.examAnswers).length;
+
+    return `
+      <div class="max-w-3xl mx-auto space-y-4 fade-in">
+        <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+          <span class="font-extrabold text-indigo-600 dark:text-indigo-400">Soru ${state.examIndex + 1} / ${state.examQuestions.length} • ${getTopicName(q.topic)}</span>
+          <span class="mono font-bold text-slate-500">İşaretlenen: ${answeredCount}/${state.examQuestions.length}</span>
+        </div>
+
+        <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+          <p class="text-sm sm:text-base font-extrabold leading-relaxed">${q.q}</p>
+          <div class="space-y-2.5">
+            ${q.opts.map((opt, idx) => {
+              const sel = chosen === idx;
+              return `
+                <button data-action="exam-pick" data-qid="${q.id}" data-idx="${idx}"
+                  class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center gap-3 ${
+                    sel ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 hover:border-indigo-400'
+                  }">
+                  <span class="w-6 h-6 rounded-lg flex items-center justify-center mono text-xs font-extrabold shrink-0 ${sel ? 'bg-white/20 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700'}">${['A','B','C','D'][idx]}</span>
+                  <span>${opt}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button data-action="exam-prev" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold" ${state.examIndex === 0 ? 'disabled' : ''}>◀ Önceki</button>
+            ${state.examIndex < state.examQuestions.length - 1 ? `
+              <button data-action="exam-next" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Sonraki ▶</button>
+            ` : `
+              <button data-action="finish-exam" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm">✓ Sınavı Bitir &amp; Karneyi Gör</button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderStats() {
+    const m = computeMetrics();
+    const weakest = [...m.topicStats].sort((a, b) => a.pct - b.pct).slice(0, 2);
+
+    return `
+      <div class="space-y-4 fade-in">
+        <!-- KPI Kartları -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400">Ustalaşılan Kart</div>
+            <div class="mono text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">${m.mastered}/${m.total}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Çalışılan: ${m.studied} kart</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400">7 Gün Sonra Kalıcılık</div>
+            <div class="mono text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">%${m.retention7d}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Stabilite S = ${m.avgStability} gün</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400">Anki Hatırlama Oranı</div>
+            <div class="mono text-2xl font-extrabold text-teal-600 dark:text-teal-400 mt-0.5">%${m.accuracy}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">${state.totalReviews} toplam tekrar</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="text-[11px] font-bold text-slate-400">Sınav Ortalaması</div>
+            <div class="mono text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">${m.examAvg !== null ? `%${m.examAvg}` : '—'}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">${state.examHistory.length} tamamlanan sınav</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 lg:col-span-1">
+            <div class="text-[11px] font-bold text-slate-400">Zayıf / Vadesi Gelen</div>
+            <div class="mono text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">${m.weak} / ${m.dueNow}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Acil tekrar adayı</div>
+          </div>
+        </div>
+
+        <!-- Acil Tekrar Önerisi Bandı -->
+        <div class="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="text-xs">
+            <span class="font-extrabold text-amber-900 dark:text-amber-200">🎯 Kişiselleştirilmiş Seviye Analizi:</span>
+            <span class="text-slate-700 dark:text-slate-300 ml-1">Şu an en düşük hakimiyetin <strong>${weakest[0].name} (%${weakest[0].pct})</strong> ve <strong>${weakest[1].name} (%${weakest[1].pct})</strong> konularında.</span>
+          </div>
+          <button data-action="jump-topic-anki" data-topic="${weakest[0].id}" class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold">
+            ${weakest[0].short} Kartlarını Başlat →
+          </button>
+        </div>
+
+        <!-- 3 İstatistiksel Grafik -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-sm font-extrabold">📉 Ebbinghaus Unutma Eğrisi: R(t) = e<sup>−t/S</sup></h3>
+            <p class="text-[11px] text-slate-500 mb-3">Tekrarsız ham unutma (kırmızı kesikli) ile senin SM-2 tekrarlarınla güçlenen hafıza eğrin (yeşil).</p>
+            <div class="relative h-64"><canvas id="chart-forgetting"></canvas></div>
+          </div>
+
+          <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-sm font-extrabold">📈 Gelişim &amp; Doğruluk Eğrisi</h3>
+            <p class="text-[11px] text-slate-500 mb-3">Tekrar turların ilerledikçe hatırlama doğruluğun (%) ve ustalaştığın kart sayısının yükselişi.</p>
+            <div class="relative h-64"><canvas id="chart-growth"></canvas></div>
+          </div>
+
+          <div class="lg:col-span-2 p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="text-sm font-extrabold">🧭 10 Ana Başlıkta Konu Hakimiyet Haritası (%)</h3>
+            <p class="text-[11px] text-slate-500 mb-3">PDF’deki her metabolik yolakta kaç kartı kalıcı hafızaya attığını gösterir.</p>
+            <div class="relative h-64"><canvas id="chart-topics"></canvas></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSyncModal() {
+    const root = document.getElementById('sync-modal-root');
+    if (!root) return;
+    if (!state.syncModalOpen) { root.innerHTML = ''; return; }
+
+    const memLink = generateMemoryLink();
+    const memCode = generateMemoryCode();
+
+    root.innerHTML = `
+      <div data-action="close-sync" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 fade-in">
+        <div data-stop-prop="true" class="w-full max-w-xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-extrabold">🔗 Kişisel Hafıza Linki &amp; Kaldığın Yerden Devam</h3>
+            <button data-action="close-sync" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-bold">✕ Kapat</button>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            Tüm SM-2 kart ilerlemen, unutma eğrin ve sınav karnen bu linkin içine şifresiz/sunucusuz olarak gömülür. Bu linki kaydet; yarın veya başka cihazda aşağıya yapıştırdığında <strong>birebir kaldığın yerden</strong> devam edersin!
+          </p>
+
+          <div class="space-y-1.5">
+            <label class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400">Senin Güncel Kişisel Hafıza Linkin:</label>
+            <div class="flex gap-2">
+              <input id="mem-link-out" readonly value="${memLink}" class="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mono text-[11px]" />
+              <button data-action="copy-mem-link" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0">📋 Kopyala</button>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+              <span>Kısa Hafıza Kodu uzunluğu: ${memCode.length} karakter</span>
+              <button data-action="copy-mem-code" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Sadece Kodu Kopyala</button>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <label class="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400">Kaldığın Yerden Devam Et (Hafıza Linkini veya Kodunu Yapıştır):</label>
+            <textarea id="mem-link-in" rows="2" placeholder="https://...#mem=KHMEM-... veya KHMEM-..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 mono text-[11px]"></textarea>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button data-action="export-tsv" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold">⬇ Gerçek Anki (.tsv) İndir</button>
+              <button data-action="import-mem-link" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">✓ İlerlememi Yükle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // =========================================================================
+  // 7. CHART.JS GRAFİKLERİ (UNUTMA, GELİŞİM & KONU HAKİMİYETİ)
+  // =========================================================================
+  let _charts = [];
+  function mountStatsCharts() {
+    _charts.forEach(c => { try { c.destroy(); } catch (_) {} });
+    _charts = [];
+    if (typeof Chart === 'undefined' || state.activeTab !== 'stats') return;
+
+    const m = computeMetrics();
+    const isDark = state.darkMode;
+    const grid = isDark ? 'rgba(148,163,184,0.15)' : 'rgba(148,163,184,0.25)';
+    const txt = isDark ? '#cbd5e1' : '#334155';
+
+    // 1. Ebbinghaus Unutma Eğrisi
+    const c1 = document.getElementById('chart-forgetting');
+    if (c1) {
+      const days = [0, 1, 2, 3, 5, 7, 10, 14, 21, 30];
+      const rawCurve = days.map(d => Math.round(Math.exp(-d / 1.5) * 100));
+      const userCurve = days.map(d => Math.round(Math.exp(-d / Math.max(1.5, m.avgStability)) * 100));
+      _charts.push(new Chart(c1, {
+        type: 'line',
+        data: {
+          labels: days.map(d => `${d}. gün`),
+          datasets: [
+            { label: 'Tekrarsız Ham Unutma (S=1.5g)', data: rawCurve, borderColor: '#e11d48', borderDash: [5, 4], tension: 0.35, borderWidth: 2, pointRadius: 2 },
+            { label: `Senin SM-2 Hafıza Eğrin (S=${m.avgStability}g)`, data: userCurve, borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.12)', fill: true, tension: 0.35, borderWidth: 3, pointRadius: 3 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: txt, font: { size: 11, weight: '600' } } } },
+          scales: {
+            x: { ticks: { color: txt, font: { size: 10 } }, grid: { color: grid } },
+            y: { min: 0, max: 105, title: { display: true, text: 'Hatırlama Olasılığı (%)', color: txt, font: { size: 10 } }, ticks: { color: txt }, grid: { color: grid } }
+          }
+        }
+      }));
+    }
+
+    // 2. Gelişim Eğrisi
+    const c2 = document.getElementById('chart-growth');
+    if (c2) {
+      const hist = state.history.length ? state.history : [{ label: 'Başlangıç', accuracy: 0, mastered: 0 }];
+      _charts.push(new Chart(c2, {
+        type: 'line',
+        data: {
+          labels: hist.map(h => h.label),
+          datasets: [
+            { label: 'Hatırlama Doğruluğu (%)', data: hist.map(h => h.accuracy), borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.12)', fill: true, tension: 0.35, borderWidth: 2.5 },
+            { label: 'Ustalaşılan Kart Sayısı', data: hist.map(h => h.mastered), borderColor: '#f59e0b', tension: 0.35, borderWidth: 2.5 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: txt, font: { size: 11, weight: '600' } } } },
+          scales: {
+            x: { ticks: { color: txt, font: { size: 10 } }, grid: { color: grid } },
+            y: { min: 0, max: 105, ticks: { color: txt }, grid: { color: grid } }
+          }
+        }
+      }));
+    }
+
+    // 3. Konu Bazlı Hakimiyet
+    const c3 = document.getElementById('chart-topics');
+    if (c3) {
+      _charts.push(new Chart(c3, {
+        type: 'bar',
+        data: {
+          labels: m.topicStats.map(t => t.short),
+          datasets: [{
+            label: 'Konu Hakimiyeti (%)',
+            data: m.topicStats.map(t => t.pct),
+            backgroundColor: m.topicStats.map(t => t.pct >= 75 ? '#10b981' : t.pct >= 40 ? '#6366f1' : '#f43f5e'),
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: txt, font: { size: 10, weight: '600' } }, grid: { display: false } },
+            y: { min: 0, max: 100, title: { display: true, text: 'Hakimiyet (%)', color: txt, font: { size: 10 } }, ticks: { color: txt }, grid: { color: grid } }
+          }
+        }
+      }));
+    }
+  }
+
+  function updateNavUI() {
+    ['anki', 'turbo', 'exam', 'stats'].forEach(t => {
+      const b = document.getElementById(`nav-${t}`);
+      if (!b) return;
+      b.className = state.activeTab === t
+        ? 'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+        : 'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white';
+    });
+  }
+
+  function render() {
+    updateNavUI();
+    const main = document.getElementById('main-content');
+    if (!main) return;
+    if (state.activeTab === 'anki') main.innerHTML = renderAnki();
+    else if (state.activeTab === 'turbo') main.innerHTML = renderTurbo();
+    else if (state.activeTab === 'exam') main.innerHTML = renderExam();
+    else main.innerHTML = renderStats();
+    renderSyncModal();
+    mountStatsCharts();
+  }
+
+  // =========================================================================
+  // 8. OLAY YÖNETİMİ & KLAVYE KISAYOLLARI
+  // =========================================================================
+  function findAction(node) {
+    let cur = node;
+    while (cur && cur !== document) {
+      if (cur.getAttribute && cur.getAttribute('data-stop-prop') === 'true') return null;
+      if (cur.getAttribute && cur.getAttribute('data-action')) return cur;
+      cur = cur.parentNode;
+    }
+    return null;
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = findAction(e.target);
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+
+    if (action === 'set-tab') {
+      state.activeTab = btn.getAttribute('data-tab');
+      render();
+    } else if (action === 'toggle-theme') {
+      state.darkMode = !state.darkMode;
+      applyTheme();
+      saveLocal();
+      render();
+    } else if (action === 'open-sync') {
+      state.syncModalOpen = true;
+      renderSyncModal();
+    } else if (action === 'close-sync') {
+      state.syncModalOpen = false;
+      renderSyncModal();
+    } else if (action === 'copy-mem-link') {
+      copyText(generateMemoryLink(), 'Kişisel Hafıza Linki kopyalandı!');
+    } else if (action === 'copy-mem-code') {
+      copyText(generateMemoryCode(), 'Kişisel Hafıza Kodu kopyalandı!');
+    } else if (action === 'import-mem-link') {
+      const inp = document.getElementById('mem-link-in');
+      if (inp && loadFromMemoryString(inp.value)) {
+        state.syncModalOpen = false;
+        state.currentCardId = null;
+        showToast('Harika! Kaldığın yerden tüm ilerlemen yüklendi.', 'emerald');
+        render();
+      } else {
+        showToast('Geçersiz hafıza linki veya kodu!', 'rose');
+      }
+    } else if (action === 'export-tsv') {
+      exportAnkiTSV();
+    } else if (action === 'show-hint') {
+      state.showHint = true;
+      render();
+    } else if (action === 'flip-anki') {
+      state.flipped = true;
+      render();
+    } else if (action === 'rate-anki') {
+      const q = Number(btn.getAttribute('data-q'));
+      if (state.currentCardId) {
+        applySM2(state.currentCardId, q);
+        state.currentCardId = null;
+        state.flipped = false;
+        state.showHint = false;
+        render();
+      }
+    } else if (action === 'turbo-filter') {
+      state.turboFilter = btn.getAttribute('data-val');
+      state.turboIndex = 0;
+      state.turboRevealed = false;
+      render();
+    } else if (action === 'turbo-flip') {
+      state.turboRevealed = !state.turboRevealed;
+      render();
+    } else if (action === 'turbo-mark') {
+      const ok = btn.getAttribute('data-ok') === '1';
+      const pool = getTurboPool();
+      const card = pool[state.turboIndex % pool.length];
+      if (card) applySM2(card.id, ok ? 3 : 1);
+      state.turboSessionCount += 1;
+      state.turboIndex += 1;
+      state.turboRevealed = false;
+      render();
+    } else if (action === 'exam-size') {
+      state.examSize = Number(btn.getAttribute('data-val'));
+      render();
+    } else if (action === 'start-exam') {
+      let pool = EXAM_BANK.filter(q => state.examTopic === 'all' || q.topic === state.examTopic);
+      // Shuffle
+      pool = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(state.examSize, pool.length));
+      state.examQuestions = pool;
+      state.examAnswers = {};
+      state.examIndex = 0;
+      state.examActive = true;
+      state.examFinished = false;
+      state.examStartTime = Date.now();
+      render();
+    } else if (action === 'exam-pick') {
+      const qid = btn.getAttribute('data-qid');
+      const idx = Number(btn.getAttribute('data-idx'));
+      state.examAnswers[qid] = idx;
+      render();
+    } else if (action === 'exam-prev') {
+      if (state.examIndex > 0) state.examIndex -= 1;
+      render();
+    } else if (action === 'exam-next') {
+      if (state.examIndex < state.examQuestions.length - 1) state.examIndex += 1;
+      render();
+    } else if (action === 'finish-exam') {
+      state.examActive = false;
+      state.examFinished = true;
+      state.examElapsedSec = Math.max(1, Math.round((Date.now() - state.examStartTime) / 1000));
+      let score = 0;
+      state.examQuestions.forEach(q => { if (state.examAnswers[q.id] === q.ans) score += 1; });
+      const pct = Math.round((score / state.examQuestions.length) * 100);
+      state.examHistory.push({
+        date: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+        score,
+        total: state.examQuestions.length,
+        pct
+      });
+      saveLocal();
+      showToast(`Sınav tamamlandı: %${pct} başarı!`, pct >= 70 ? 'emerald' : 'amber');
+      render();
+    } else if (action === 'reset-exam') {
+      state.examActive = false;
+      state.examFinished = false;
+      render();
+    } else if (action === 'jump-topic-anki') {
+      state.activeTab = 'anki';
+      state.topicFilter = btn.getAttribute('data-topic');
+      state.currentCardId = null;
+      state.flipped = false;
+      state.showHint = false;
+      render();
+    }
+  });
+
+  document.addEventListener('change', (e) => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const act = el.getAttribute('data-action');
+    if (act === 'anki-topic-filter') {
+      state.topicFilter = el.value;
+      state.currentCardId = null;
+      state.flipped = false;
+      state.showHint = false;
+      render();
+    } else if (act === 'turbo-topic-select') {
+      state.turboFilter = el.value;
+      state.turboIndex = 0;
+      state.turboRevealed = false;
+      render();
+    } else if (act === 'exam-topic') {
+      state.examTopic = el.value;
+      render();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (state.syncModalOpen && e.key === 'Escape') {
+      state.syncModalOpen = false;
+      renderSyncModal();
+      return;
+    }
+    if (state.activeTab === 'anki') {
+      if (e.key === ' ' && !state.flipped) {
+        e.preventDefault();
+        state.flipped = true;
+        render();
+      } else if ((e.key === 'h' || e.key === 'H') && !state.flipped) {
+        state.showHint = true;
+        render();
+      } else if (state.flipped && ['1', '2', '3', '4'].includes(e.key) && state.currentCardId) {
+        applySM2(state.currentCardId, Number(e.key));
+        state.currentCardId = null;
+        state.flipped = false;
+        state.showHint = false;
+        render();
+      }
+    }
+  });
+
+  loadLocal();
+  applyTheme();
+  render();
+})();
+</script>
+</body>
+</html>
