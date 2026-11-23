@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -79,11 +79,14 @@
         </nav>
 
         <div class="flex items-center gap-1.5">
+          <button data-action="toggle-clinic-mode" id="clinic-mode-btn" class="px-2.5 py-1.5 rounded-lg border text-xs font-bold transition whitespace-nowrap" title="Ekstra Hasta Başı Klinik Notlarını Aç/Kapat">
+            🏥 Ekstra Klinik: Kapalı
+          </button>
           <button data-action="open-sync" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold hover:bg-indigo-100 transition whitespace-nowrap" title="Kişisel Hafıza Linki & Yedek">
             🔗 Hafıza Linki
           </button>
-          <button data-action="toggle-theme" id="theme-btn" class="p-1.5 px-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs">
-            🌙
+          <button data-action="toggle-theme" id="theme-btn" class="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition whitespace-nowrap">
+            ☀️ Aydınlık
           </button>
         </div>
       </div>
@@ -469,26 +472,70 @@
   ];
 
   // =========================================================================
-  // 3. ÖLÇME & DEĞERLENDİRME SORU BANKASI (16 Klinik + Spot Sınav Sorusu)
+  // 3. ÖLÇME & DEĞERLENDİRME BANKALARI: 5 ŞIKLI (A–E) + KISA CEVAPLI AÇIK UÇLU
   // =========================================================================
   const EXAM_BANK = [
-    { id: 'e01', topic: 'chem', q: 'Aşağıdaki monosakkaritlerden hangisinde asimetrik (kiral) karbon atomu BULUNMAZ?', opts: ['D-Gliseraldehit', 'Dihidroksiaseton', 'D-Riboz', 'D-Früktoz'], ans: 1, exp: 'Dihidroksiaseton simetrik yapılı ketotriozdur; 4 farklı gruba bağlı karbonu yoktur (PDF s.10).' },
-    { id: 'e02', topic: 'chem', q: 'Aşağıdaki disakkarit çiftlerinden hangilerinin HER İKİSİ DE indirgeyici (redüktan) DEĞİLDİR?', opts: ['Maltoz ve Laktoz', 'Sükroz ve Trehaloz', 'Laktoz ve Sellobioz', 'İzomaltoz ve Maltoz'], ans: 1, exp: 'Sükrozda α-(1,2), Trehalozda α-(1,1) bağı her iki anomerik karbonu kilitlediği için serbest asetal hidroksili yoktur (PDF s.15-18).' },
-    { id: 'e03', topic: 'digest', q: 'İnce bağırsakta glikoz ve galaktoz emilimini sağlayan SGLT-1 taşıyıcısı için aşağıdakilerden hangisi DOĞRUDUR?', opts: ['Früktozu da aynı hızda taşır', '2 Na⁺ ile sekonder aktif taşıma yapar ve Na⁺-K⁺ ATPaz gradyentine bağımlıdır', 'Bazolateral membranda yer alır', 'Akarboz tarafından doğrudan inhibe edilir'], ans: 1, exp: 'SGLT-1 apikal membranda 2 Na⁺ ile glikoz/galaktozu içeri alır; früktoz GLUT-5, kana geçiş ise GLUT-2 ile olur (PDF s.23).' },
-    { id: 'e04', topic: 'glyc', q: 'Açlıkta yükselen Glukagon, karaciğerde PKA aracılığıyla bifonksiyonel PFK-2 / FBPaz-2 enzimini fosforiller. Bunun doğrudan sonucu nedir?', opts: ['Früktoz 2,6-bisfosfat artar ve glikoliz hızlanır', 'Früktoz 2,6-bisfosfat azalır, PFK-1 frenlenir ve glikoneojenez açılır', 'Piruvat kinaz defosforile olup aktifleşir', 'Glikokinaz G6P ile inhibe olur'], ans: 1, exp: 'PKA fosforilasyonu FBPaz-2’yi aktif, PFK-2’yi inaktif yapar → F-2,6-BP düşer → PFK-1 yavaşlar, F-1,6-BPaz açılır (PDF s.36).' },
-    { id: 'e05', topic: 'glyc', q: 'Kan glikozu ölçüm tüpüne (gri tüp) konulan Sodyum Florür hangi glikolitik enzimi inhibe eder?', opts: ['Heksokinaz', 'Aldolaz', 'GAPDH', 'Enolaz'], ans: 3, exp: 'Florür, Mg²⁺ ile kompleks oluşturarak Enolazı (2-Fosfogliserat → PEP) inhibe eder.' },
-    { id: 'e06', topic: 'glyc', q: 'Eritrositlerde Rapoport-Luebering şantıyla 2,3-BPG üretiminin fizyolojik sonucu aşağıdakilerden hangisidir?', opts: ['Oksihemoglobin eğrisi sola kayar', 'PGK basamağındaki ATP üretimi atlanır ve dokulara O₂ bırakılması kolaylaşır', 'Net ATP kazancı 4’e çıkar', 'Methemoglobin oluşur'], ans: 1, exp: '2,3-BPG eğriyi sağa kaydırarak O₂’nin dokulara salınımını kolaylaştırır; bu sırada PGK basamağındaki ATP atlanır (PDF s.56).' },
-    { id: 'e07', topic: 'pdh', q: 'PDH kompleksinin kovalent düzenlenmesiyle ilgili aşağıdakilerden hangisi DOĞRUDUR?', opts: ['PDH Kinaz enzimi PDH’yi fosforilleyerek aktive eder', 'İnsülin ve Ca²⁺, PDH Fosfatazı uyararak PDH’yi defosforile (aktif) hale getirir', 'Yüksek Asetil-KoA ve NADH, PDH’yi aktive eder', 'Reaksiyon yüksek Piruvat varlığında tersine döner'], ans: 1, exp: 'PDH defosforile iken AKTİFTİR! İnsülin ve Ca²⁺ fosfatazı uyarır; Asetil-KoA/NADH/ATP ise kinazı uyararak PDH’yi kapatır (PDF s.66).' },
-    { id: 'e08', topic: 'tca', q: '1 mol glikozun karaciğer/kalp hücresinde 32 ATP, iskelet kasında 30 ATP vermesinin temel nedeni nedir?', opts: ['Kasta Süksinat DH’ın çalışmaması', 'Malat-Aspartat mekiğinin 2,5 ATP/NADH, Gliserol 3-P mekiğinin 1,5 ATP/NADH üretmesi', 'Kasta PDH’ın 1 NADH üretmesi', 'Karaciğerde PFK-1’in ATP harcamaması'], ans: 1, exp: 'Glikolizdeki 2 NADH, Malat-Aspartat ile +5 ATP (toplam 32), Gliserol 3-P ile +3 ATP (toplam 30) kazandırır (PDF s.79-82).' },
-    { id: 'e09', topic: 'tca', q: 'Aşağıdaki Krebs inhibitörü — hedef enzim eşleştirmelerinden hangisi YANLIŞTIR?', opts: ['Floroasetat (Florositrat) — Akonitaz', 'Arsenit — α-Ketoglutarat DH', 'Malonat — Süksinat Dehidrojenaz', 'Arsenat — Sitrat Sentaz'], ans: 3, exp: 'Arsenat glikolizde GAPDH’da Pi yerine geçer; Sitrat sentaz inhibitörü değildir.' },
-    { id: 'e10', topic: 'ppp', q: 'Akdenizli 8 yaşındaki erkek çocuk bakla yedikten 24 saat sonra sarılık, koyu idrar ve periferik yaymada Heinz cisimcikleri ile geliyor. Temel patogenez nedir?', opts: ['Eritrositlerde ATP sentezinin sıfırlanması', 'G6PD eksikliğine bağlı NADPH yetersizliği ve glutatyonun yenilenememesi', 'Transketolaz eksikliği', '2,3-BPG artışı'], ans: 1, exp: 'G6PD eksikliğinde oksidan stresle NADPH yetmez, GSH tükenir, hemoglobin denatüre olup Heinz cisimcikleri yapar ve hemoliz gelişir (PDF s.110-111).' },
-    { id: 'e11', topic: 'other', q: 'İlk 5 ay anne sütüyle sağlıklı büyüyen bebek, 6. ayda meyve suyu ve sükrozlu mamaya geçince kusma ve ağır hipoglisemi geliştiriyor. İdrarda indirgeyici şeker (+), glikoz oksidaz (-). Eksik enzim hangisidir?', opts: ['Früktokinaz', 'Aldolaz B', 'GALT', 'Glikoz 6-fosfataz'], ans: 1, exp: 'Herediter Früktoz İntoleransı (Aldolaz B eksikliği): F-1-P birikir, Pi/ATP tükenir → ağır hipoglisemi. Früktokinaz eksikliği ise benigndir (PDF s.127).' },
-    { id: 'e12', topic: 'other', q: 'Kontrolsüz diyabetli hastada lens liflerinde ozmotik şişme ve katarakt gelişiminden sorumlu yolak ve metabolit hangisidir?', opts: ['Üronik asit yolu — UDP-Glikuronat', 'Poliol yolu — Aldoz redüktaz / Sorbitol', 'Pentoz fosfat yolu — Riboz 5-P', 'Cori siklusu — Laktat'], ans: 1, exp: 'Hiperglisemide lenste Aldoz redüktaz glikozu Sorbitole çevirir; Sorbitol DH az olduğundan Sorbitol birikip su çeker (PDF s.127).' },
-    { id: 'e13', topic: 'gng', q: 'Açlıkta aşırı alkol alan bir kişide ağır hipoglisemi gelişmesinin biyokimyasal nedeni nedir?', opts: ['Alkolün Glikoz 6-fosfatazı yıkması', 'NADH/NAD⁺ oranının aşırı artmasıyla Piruvat→Laktat ve OAA→Malat kaymasının glikoneojenezi kilitlemesi', 'Asetil-KoA’nın Piruvat karboksilazı inhibe etmesi', 'Alkolün insülin salgılatması'], ans: 1, exp: 'Etanol yıkımı karaciğerde muazzam NADH üretir ve NAD⁺ gerektiren glikoneojenez girişlerini tersine çevirir.' },
-    { id: 'e14', topic: 'glg', q: '20 yaşındaki hastada egzersizle baldır krampları ve koyu idrar (miyoglobinüri) oluyor; iskemik egzersizde kan laktatı YÜKSELMİYOR ve açlık kan şekeri normal. Tanı nedir?', opts: ['Von Gierke (Tip I)', 'Pompe (Tip II)', 'Cori (Tip III)', 'McArdle (Tip V — Kas Glikojen Fosforilazı)'], ans: 3, exp: 'McArdle (GSD Tip V): Kas glikojenini yıkamadığı için laktat artmaz; karaciğer sağlam olduğundan hipoglisemi olmaz.' },
-    { id: 'e15', topic: 'dm', q: 'Hemolitik anemisi olan bir diyabet hastasında son 1–2 haftalık kan glikozu ortalamasını değerlendirmek için en uygun test hangisidir?', opts: ['HbA1c', 'Fruktozamin (Glike serum albümini)', 'Açlık ketonu', 'Serum amilaz'], ans: 1, exp: 'Hemolitik anemide eritrosit ömrü kısaldığından HbA1c yalancı düşük çıkar; Fruktozamin 1–2 haftalık glisemiyi yansıtır (PDF s.197).' },
-    { id: 'e16', topic: 'dm', q: 'Güncel ADA 2026 kılavuzuna göre klinik olarak anlamlı Düzey 2 Hipoglisemi eşiği ve kanda en yüksek oranda (%78) bulunan keton cismi sırasıyla hangisidir?', opts: ['<70 mg/dL — Aseton', '<54 mg/dL — β-Hidroksibütirat', '<60 mg/dL — Asetoasetat', '<45 mg/dL — Aseton'], ans: 1, exp: 'ADA 2026: Düzey 1 <70 mg/dL, Düzey 2 <54 mg/dL. Ketonların %78’i β-hidroksibütirat, %20’si asetoasetat, %2’si asetondur (PDF s.198).' }
+    { id: 'e01', topic: 'chem', q: 'Aşağıdaki monosakkaritlerden hangisinde asimetrik (kiral) karbon atomu BULUNMAZ?', opts: ['D-Gliseraldehit', 'Dihidroksiaseton', 'D-Riboz', 'D-Früktoz', 'D-Galaktoz'], ans: 1, exp: 'Dihidroksiaseton simetrik yapılı ketotriozdur; 4 farklı gruba bağlı karbonu yoktur (PDF s.10).' },
+    { id: 'e02', topic: 'chem', q: 'Aşağıdaki disakkarit çiftlerinden hangilerinin HER İKİSİ DE indirgeyici (redüktan) DEĞİLDİR?', opts: ['Maltoz ve Laktoz', 'Sükroz ve Trehaloz', 'Laktoz ve Sellobioz', 'İzomaltoz ve Maltoz', 'Gentiobioz ve Laktoz'], ans: 1, exp: 'Sükrozda α-(1,2), Trehalozda α-(1,1) bağı her iki anomerik karbonu kilitlediği için serbest asetal hidroksili yoktur (PDF s.15-18).' },
+    { id: 'e03', topic: 'digest', q: 'İnce bağırsakta glikoz ve galaktoz emilimini sağlayan SGLT-1 taşıyıcısı için aşağıdakilerden hangisi DOĞRUDUR?', opts: ['Früktozu da aynı hızda taşır', '2 Na⁺ ile sekonder aktif taşıma yapar ve Na⁺-K⁺ ATPaz gradyentine bağımlıdır', 'Bazolateral membranda yer alır', 'Akarboz tarafından doğrudan inhibe edilir', 'İnsülin bağımlı translokasyonla çalışır'], ans: 1, exp: 'SGLT-1 apikal membranda 2 Na⁺ ile glikoz/galaktozu içeri alır; früktoz GLUT-5, kana geçiş ise GLUT-2 ile olur (PDF s.23).' },
+    { id: 'e04', topic: 'glyc', q: 'Açlıkta yükselen Glukagon, karaciğerde PKA aracılığıyla bifonksiyonel PFK-2 / FBPaz-2 enzimini fosforiller. Bunun doğrudan sonucu nedir?', opts: ['Früktoz 2,6-bisfosfat artar ve glikoliz hızlanır', 'Früktoz 2,6-bisfosfat azalır, PFK-1 frenlenir ve glikoneojenez açılır', 'Piruvat kinaz defosforile olup aktifleşir', 'Glikokinaz G6P ile inhibe olur', 'Heksokinaz sentezi indüklenir'], ans: 1, exp: 'PKA fosforilasyonu FBPaz-2’yi aktif, PFK-2’yi inaktif yapar → F-2,6-BP düşer → PFK-1 yavaşlar, F-1,6-BPaz açılır (PDF s.36).' },
+    { id: 'e05', topic: 'glyc', q: 'Kan glikozu ölçüm tüpüne (gri tüp) konulan Sodyum Florür hangi glikolitik enzimi inhibe eder?', opts: ['Heksokinaz', 'Aldolaz', 'GAPDH', 'Enolaz', 'Fosfogliserat kinaz'], ans: 3, exp: 'Florür, Mg²⁺ ile kompleks oluşturarak Enolazı (2-Fosfogliserat → PEP) inhibe eder.' },
+    { id: 'e06', topic: 'glyc', q: 'Eritrositlerde Rapoport-Luebering şantıyla 2,3-BPG üretiminin fizyolojik sonucu aşağıdakilerden hangisidir?', opts: ['Oksihemoglobin eğrisi sola kayar', 'PGK basamağındaki ATP üretimi atlanır ve dokulara O₂ bırakılması kolaylaşır', 'Net ATP kazancı 4’e çıkar', 'Methemoglobin oluşur', 'Piruvat kinaz inhibe olur'], ans: 1, exp: '2,3-BPG eğriyi sağa kaydırarak O₂’nin dokulara salınımını kolaylaştırır; bu sırada PGK basamağındaki ATP atlanır (PDF s.56).' },
+    { id: 'e07', topic: 'pdh', q: 'PDH kompleksinin kovalent düzenlenmesiyle ilgili aşağıdakilerden hangisi DOĞRUDUR?', opts: ['PDH Kinaz enzimi PDH’yi fosforilleyerek aktive eder', 'İnsülin ve Ca²⁺, PDH Fosfatazı uyararak PDH’yi defosforile (aktif) hale getirir', 'Yüksek Asetil-KoA ve NADH, PDH’yi aktive eder', 'Reaksiyon yüksek Piruvat varlığında tersine döner', 'Sitozolde gerçekleşir'], ans: 1, exp: 'PDH defosforile iken AKTİFTİR! İnsülin ve Ca²⁺ fosfatazı uyarır; Asetil-KoA/NADH/ATP ise kinazı uyararak PDH’yi kapatır (PDF s.66).' },
+    { id: 'e08', topic: 'tca', q: '1 mol glikozun karaciğer/kalp hücresinde 32 ATP, iskelet kasında 30 ATP vermesinin temel nedeni nedir?', opts: ['Kasta Süksinat DH’ın çalışmaması', 'Malat-Aspartat mekiğinin 2,5 ATP/NADH, Gliserol 3-P mekiğinin 1,5 ATP/NADH üretmesi', 'Kasta PDH’ın 1 NADH üretmesi', 'Karaciğerde PFK-1’in ATP harcamaması', 'Kasta Süksinat tiyokinazın GTP üretmemesi'], ans: 1, exp: 'Glikolizdeki 2 NADH, Malat-Aspartat ile +5 ATP (toplam 32), Gliserol 3-P ile +3 ATP (toplam 30) kazandırır (PDF s.79-82).' },
+    { id: 'e09', topic: 'tca', q: 'Aşağıdaki Krebs inhibitörü — hedef enzim eşleştirmelerinden hangisi YANLIŞTIR?', opts: ['Floroasetat (Florositrat) — Akonitaz', 'Arsenit — α-Ketoglutarat DH', 'Malonat — Süksinat Dehidrojenaz', 'Arsenat — Sitrat Sentaz', 'Yüksek NADH — İzositrat Dehidrojenaz'], ans: 3, exp: 'Arsenat glikolizde GAPDH’da Pi yerine geçer; Sitrat sentaz inhibitörü değildir.' },
+    { id: 'e10', topic: 'ppp', q: 'Akdenizli 8 yaşındaki erkek çocuk bakla yedikten 24 saat sonra sarılık, koyu idrar ve periferik yaymada Heinz cisimcikleri ile geliyor. Temel patogenez nedir?', opts: ['Eritrositlerde ATP sentezinin sıfırlanması', 'G6PD eksikliğine bağlı NADPH yetersizliği ve glutatyonun yenilenememesi', 'Transketolaz eksikliği', '2,3-BPG artışı', 'Piruvat kinaz eksikliği'], ans: 1, exp: 'G6PD eksikliğinde oksidan stresle NADPH yetmez, GSH tükenir, hemoglobin denatüre olup Heinz cisimcikleri yapar ve hemoliz gelişir (PDF s.110-111).' },
+    { id: 'e11', topic: 'other', q: 'İlk 5 ay anne sütüyle sağlıklı büyüyen bebek, 6. ayda meyve suyu ve sükrozlu mamaya geçince kusma ve ağır hipoglisemi geliştiriyor. İdrarda indirgeyici şeker (+), glikoz oksidaz (-). Eksik enzim hangisidir?', opts: ['Früktokinaz', 'Aldolaz B', 'GALT', 'Glikoz 6-fosfataz', 'Galaktokinaz'], ans: 1, exp: 'Herediter Früktoz İntoleransı (Aldolaz B eksikliği): F-1-P birikir, Pi/ATP tükenir → ağır hipoglisemi. Früktokinaz eksikliği ise benigndir (PDF s.127).' },
+    { id: 'e12', topic: 'other', q: 'Kontrolsüz diyabetli hastada lens liflerinde ozmotik şişme ve katarakt gelişiminden sorumlu yolak ve metabolit hangisidir?', opts: ['Üronik asit yolu — UDP-Glikuronat', 'Poliol yolu — Aldoz redüktaz / Sorbitol', 'Pentoz fosfat yolu — Riboz 5-P', 'Cori siklusu — Laktat', 'Glikojenoliz — Glikoz 1-P'], ans: 1, exp: 'Hiperglisemide lenste Aldoz redüktaz glikozu Sorbitole çevirir; Sorbitol DH az olduğundan Sorbitol birikip su çeker (PDF s.127).' },
+    { id: 'e13', topic: 'gng', q: 'Açlıkta aşırı alkol alan bir kişide ağır hipoglisemi gelişmesinin biyokimyasal nedeni nedir?', opts: ['Alkolün Glikoz 6-fosfatazı yıkması', 'NADH/NAD⁺ oranının aşırı artmasıyla Piruvat→Laktat ve OAA→Malat kaymasının glikoneojenezi kilitlemesi', 'Asetil-KoA’nın Piruvat karboksilazı inhibe etmesi', 'Alkolün insülin salgılatması', 'Glukagon reseptörlerinin yıkılması'], ans: 1, exp: 'Etanol yıkımı karaciğerde muazzam NADH üretir ve NAD⁺ gerektiren glikoneojenez girişlerini tersine çevirir.' },
+    { id: 'e14', topic: 'glg', q: '20 yaşındaki hastada egzersizle baldır krampları ve koyu idrar (miyoglobinüri) oluyor; iskemik egzersizde kan laktatı YÜKSELMİYOR ve açlık kan şekeri normal. Tanı nedir?', opts: ['Von Gierke (Tip I)', 'Pompe (Tip II)', 'Cori (Tip III)', 'McArdle (Tip V — Kas Glikojen Fosforilazı)', 'Hers (Tip VI — Karaciğer Fosforilazı)'], ans: 3, exp: 'McArdle (GSD Tip V): Kas glikojenini yıkamadığı için laktat artmaz; karaciğer sağlam olduğundan hipoglisemi olmaz.' },
+    { id: 'e15', topic: 'dm', q: 'Hemolitik anemisi olan bir diyabet hastasında son 1–2 haftalık kan glikozu ortalamasını değerlendirmek için en uygun test hangisidir?', opts: ['HbA1c', 'Fruktozamin (Glike serum albümini)', 'Açlık ketonu', 'Serum amilaz', 'İdrar C-peptid'], ans: 1, exp: 'Hemolitik anemide eritrosit ömrü kısaldığından HbA1c yalancı düşük çıkar; Fruktozamin 1–2 haftalık glisemiyi yansıtır (PDF s.197).' },
+    { id: 'e16', topic: 'dm', q: 'Güncel ADA 2026 kılavuzuna göre klinik olarak anlamlı Düzey 2 Hipoglisemi eşiği ve kanda en yüksek oranda (%78) bulunan keton cismi sırasıyla hangisidir?', opts: ['<70 mg/dL — Aseton', '<54 mg/dL — β-Hidroksibütirat', '<60 mg/dL — Asetoasetat', '<45 mg/dL — Aseton', '<54 mg/dL — Asetoasetat'], ans: 1, exp: 'ADA 2026: Düzey 1 <70 mg/dL, Düzey 2 <54 mg/dL. Ketonların %78’i β-hidroksibütirat, %20’si asetoasetat, %2’si asetondur (PDF s.198).' }
   ];
+
+  // Tek Cevaplı Kısa Cevaplı (Açık Uçlu) Aktif Geri Çağırma Bankası (22 Spot Soru)
+  const OPEN_BANK = [
+    { id: 'o01', cardId: 'c01', topic: 'chem', q: 'Asimetrik (kiral) karbon atomu İÇERMEYEN tek monosakkaritin adını yaz:', display: 'Dihidroksiaseton', accepted: ['dihidroksiaseton', 'dha'], exp: '3 karbonlu ketotriozdur; C1 ve C3 özdeş (CH₂OH) olduğu için kiral karbonu yoktur (PDF s.10).' },
+    { id: 'o02', cardId: 'c02', topic: 'chem', q: 'D-Glikozun C4 epimeri olan aldoheksoz hangisidir?', display: 'Galaktoz (D-Galaktoz)', accepted: ['galaktoz', 'd-galaktoz', 'd galaktoz'], exp: 'C4-OH grubu yukarıdadır; C2 epimeri ise Mannozdur (PDF s.6).' },
+    { id: 'o03', cardId: 'c06', topic: 'digest', q: 'İnce bağırsakta Früktozun lümenden enterosite girdiği taşıyıcının adını yaz:', display: 'GLUT-5', accepted: ['glut5', 'glut-5', 'glut 5'], exp: 'Früktoz GLUT-5 ile Na⁺ bağımsız girer; Glikoz/Galaktoz SGLT-1 ile girer (PDF s.23).' },
+    { id: 'o04', cardId: 'c10', topic: 'glyc', q: 'Glikolizin ANA hız kısıtlayıcı enzimi hangisidir?', display: 'Fosfofrüktokinaz-1 (PFK-1)', accepted: ['pfk-1', 'pfk1', 'pfk 1', 'fosfofruktokinaz-1', 'fosfofruktokinaz 1', 'fosfofruktokinaz'], exp: 'Früktoz 6-P → Früktoz 1,6-BP basamağını katalizler; en güçlü aktivatörü F-2,6-BP’dır (PDF s.34-35).' },
+    { id: 'o05', cardId: 'c13', topic: 'glyc', q: 'Kan glikozu ölçüm tüpündeki (gri tüp) Sodyum Florür hangi enzimi inhibe eder?', display: 'Enolaz', accepted: ['enolaz'], exp: 'Mg²⁺ ile florofosfat kompleksi kurarak 2-Fosfogliserat → PEP dönüşümünü durdurur (PDF s.47).' },
+    { id: 'o06', cardId: 'c14', topic: 'glyc', q: 'Piruvat Kinazın glikoliz içindeki ileri-besleme (feed-forward) aktivatörü olan molekül nedir?', display: 'Früktoz 1,6-bisfosfat', accepted: ['fruktoz 1,6-bisfosfat', 'fruktoz 1 6 bisfosfat', 'f-1,6-bp', 'f16bp', 'fruktoz 1,6 bisfosfat'], exp: 'PFK-1 ürünü olan F-1,6-BP aşağı basamaktaki Piruvat kinazı aktive eder (PDF s.49).' },
+    { id: 'o07', cardId: 'c17', topic: 'pdh', q: 'PDH (E1) ve Transketolaz enzimlerinin ortak vitamin B1 türevi koenzimi nedir?', display: 'Tiamin Pirofosfat (TPP)', accepted: ['tpp', 'tiamin pirofosfat', 'tiamin', 'b1', 'vitamin b1'], exp: 'Tiamin eksikliğinde PDH, α-KGDH ve Transketolaz bozulur (Wernicke-Korsakoff / Beriberi).' },
+    { id: 'o08', cardId: 'c19', topic: 'pdh', q: 'Arsenit (As³⁺) ve Cıva, PDH kompleksinde hangi koenzimin -SH gruplarını bloke eder?', display: 'Lipoat (Lipoik asit)', accepted: ['lipoat', 'lipoik asit', 'dihidrolipoat'], exp: 'E2 alt birimindeki indirgenmiş lipoatın iki -SH grubuna bağlanıp kompleksi kilitler (PDF s.60-61).' },
+    { id: 'o09', cardId: 'c21', topic: 'tca', q: 'Sitrik Asit Siklusunun (Krebs) ANA hız kısıtlayıcı enzimi hangisidir?', display: 'İzositrat Dehidrojenaz', accepted: ['izositrat dehidrojenaz', 'idh', 'izositrat dh'], exp: 'ADP ve NAD⁺ ile aktive, ATP ve NADH ile inhibe olur (PDF s.90).' },
+    { id: 'o10', cardId: 'c22', topic: 'tca', q: 'Floroasetat (Florositrat) Krebs döngüsünde hangi enzimi inhibe eder?', display: 'Akonitaz', accepted: ['akonitaz'], exp: 'Sitrat → İzositrat izomerizasyonunu bloke ederek döngüyü durdurur (PDF s.69).' },
+    { id: 'o11', cardId: 'c22', topic: 'tca', q: 'Mitokondri iç membranına gömülü tek Krebs enzimi (ve Malonatın hedefi) hangisidir?', display: 'Süksinat Dehidrojenaz', accepted: ['suksinat dehidrojenaz', 'suksinat dh', 'sdh', 'kompleks 2', 'kompleks ii'], exp: 'FAD bağımlıdır, ETZ Kompleks II’dir ve Malonatla kompetitif inhibe olur (PDF s.74).' },
+    { id: 'o12', cardId: 'c20', topic: 'tca', q: 'Krebs döngüsünde doğrudan GTP (substrat düzeyinde fosforilasyon) üreten enzim hangisidir?', display: 'Süksinat Tiyokinaz (Süksinil-KoA Sentetaz)', accepted: ['suksinat tiyokinaz', 'suksinil koa sentetaz', 'suksinil-koa sentetaz'], exp: 'Süksinil-KoA → Süksinat basamağında 1 GTP (=1 ATP) üretir (PDF s.73).' },
+    { id: 'o13', cardId: 'c26', topic: 'ppp', q: 'Pentoz Fosfat Yolunun hız kısıtlayıcı enzimi hangisidir?', display: 'Glikoz 6-fosfat Dehidrojenaz (G6PD)', accepted: ['g6pd', 'g6pdh', 'glikoz 6-fosfat dehidrojenaz', 'glikoz 6 fosfat dehidrojenaz'], exp: 'Eksikliğinde (Favizm) eritrositlerde NADPH yetmez ve hemolitik kriz gelişir (PDF s.95, 110).' },
+    { id: 'o14', cardId: 'c28', topic: 'ppp', q: 'G6PD eksikliğinde oksidatif stresle denatüre olup eritrosit içinde çöken hemoglobin cisimciklerinin adı nedir?', display: 'Heinz Cisimcikleri', accepted: ['heinz', 'heinz cisimcikleri', 'heinz cisimcigi'], exp: 'Dalak makrofajları bu cisimcikleri ısırıp koparır (bite cells) ve hemoliz gelişir (PDF s.111).' },
+    { id: 'o15', cardId: 'c30', topic: 'other', q: 'İnsanlarda eksik olduğu için C vitamini (L-askorbik asit) sentezleyemememize yol açan enzim hangisidir?', display: 'L-Gulonolakton Oksidaz', accepted: ['l-gulonolakton oksidaz', 'gulonolakton oksidaz', 'l gulonolakton oksidaz'], exp: 'Üronik asit yolunun son basamağı insanlarda genetik olarak inaktiftir (PDF s.126).' },
+    { id: 'o16', cardId: 'c31', topic: 'other', q: 'Diyabette lenste glikozu NADPH harcayarak Sorbitole çeviren (katarakt yapan) enzim hangisidir?', display: 'Aldoz Redüktaz', accepted: ['aldoz reduktaz'], exp: 'Poliol yolunun 1. enzimidir; Sorbitol zardan çıkamayıp ozmotik şişme yapar (PDF s.127).' },
+    { id: 'o17', cardId: 'c32', topic: 'other', q: 'Herediter Früktoz İntoleransında (ağır hipoglisemi yapan) eksik olan enzim hangisidir?', display: 'Aldolaz B (Früktoz 1-fosfat Aldolaz)', accepted: ['aldolaz b', 'aldolaz-b', 'fruktoz 1-fosfat aldolaz', 'fruktoz 1 fosfat aldolaz'], exp: 'F-1-P birikip hücre içi Pi ve ATP’yi tüketir. Früktokinaz eksikliği ise benigndir (PDF s.127).' },
+    { id: 'o18', cardId: 'c33', topic: 'other', q: 'Klasik Galaktozemide eksik olan enzimin adını veya kısaltmasını yaz:', display: 'GALT (Galaktoz 1-fosfat Üridil Transferaz)', accepted: ['galt', 'galaktoz 1-fosfat uridil transferaz', 'galaktoz 1 fosfat uridil transferaz'], exp: 'Galaktoz 1-P birikir ve Galaktitol katarakt yapar (PDF s.128).' },
+    { id: 'o19', cardId: 'c34', topic: 'gng', q: 'Glikoneojenezin ANA hız kısıtlayıcı enzimi hangisidir?', display: 'Früktoz 1,6-bisfosfataz', accepted: ['fruktoz 1,6-bisfosfataz', 'fruktoz 1 6 bisfosfataz', 'fbpaz-1', 'fbpaz1', 'fbpaz'], exp: 'PFK-1’in tam karşılığıdır; F-2,6-BP ve AMP ile inhibe olur (PDF s.145).' },
+    { id: 'o20', cardId: 'c35', topic: 'gng', q: 'Mitokondride Piruvat Karboksilazın ZORUNLU allosterik aktivatörü olan 2 karbonlu molekül nedir?', display: 'Asetil-KoA', accepted: ['asetil-koa', 'asetil koa', 'asetilkoa', 'acetyl coa', 'acetyl-coa'], exp: 'Karbon vermez ama şalteri açar; yağ oksidasyonu hızlanınca piruvatı glikoza yönlendirir (PDF s.145).' },
+    { id: 'o21', cardId: 'c38', topic: 'glg', q: 'Glikojen sentezinde ilk 7 glikozu otokatalitik olarak bağlayan öncül proteinin adı nedir?', display: 'Glikojenin', accepted: ['glikojenin', 'glycogenin'], exp: '8. glikozdan itibaren Glikojen Sentaz devralır (PDF s.147).' },
+    { id: 'o22', cardId: 'c45', topic: 'dm', q: 'Hemolitik anemide HbA1c güvenilmez olduğunda son 1–2 haftalık glisemiyi ölçen glike albümin testi nedir?', display: 'Fruktozamin', accepted: ['fruktozamin', 'fruktoz amin'], exp: 'Serum albümin glikasyonunu ölçer ve eritrosit ömründen bağımsızdır (PDF s.197).' }
+  ];
+
+  function normalizeTr(s) {
+    return (s || '')
+      .toLowerCase()
+      .replace(/ı/g, 'i').replace(/İ/g, 'i')
+      .replace(/ğ/g, 'g').replace(/ü/g, 'u')
+      .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  function isOpenAnswerMatch(userText, acceptedList) {
+    const norm = normalizeTr(userText);
+    if (!norm || norm.length < 2) return false;
+    return acceptedList.some(a => {
+      const na = normalizeTr(a);
+      return norm === na || (norm.length >= 4 && (na.includes(norm) || norm.includes(na)));
+    });
+  }
 
   // =========================================================================
   // 4. SM-2 ALGORİTMASI & KİŞİSEL HAFIZA LİNKİ (ENCODE / DECODE)
@@ -497,7 +544,8 @@
 
   const state = {
     activeTab: 'anki', // 'anki' | 'turbo' | 'exam' | 'stats'
-    darkMode: false,
+    darkMode: true,
+    showExtraClinic: false,
     topicFilter: 'all',
     showHint: false,
     flipped: false,
@@ -518,14 +566,15 @@
     turboRevealed: false,
     turboSessionCount: 0,
 
-    // Ölçme & Değerlendirme
+    // Ölçme & Değerlendirme (Açık Uçlu Kısa Cevap + 5 Şıklı Çoktan Seçmeli)
+    examMode: 'open', // 'open' (Varsayılan: Aktif Geri Çağırma!) | 'mcq' (5 Şıklı)
     examActive: false,
     examFinished: false,
     examTopic: 'all',
     examSize: 10,
     examQuestions: [],
     examIndex: 0,
-    examAnswers: {}, // qId: chosenIdx
+    examAnswers: {}, // mcq: qId -> idx | open: qId -> { text, status: 'exact'|'tip'|'recognized'|'none', revealed: bool }
     examStartTime: null,
     examElapsedSec: 0,
 
@@ -664,7 +713,8 @@
         totalReviews: state.totalReviews,
         correctReviews: state.correctReviews,
         streakDays: state.streakDays,
-        darkMode: state.darkMode
+        darkMode: state.darkMode,
+        showExtraClinic: state.showExtraClinic
       }));
     } catch (_) {}
   }
@@ -691,6 +741,7 @@
         if (typeof p.correctReviews === 'number') state.correctReviews = p.correctReviews;
         if (typeof p.streakDays === 'number') state.streakDays = p.streakDays;
         if (typeof p.darkMode === 'boolean') state.darkMode = p.darkMode;
+        if (typeof p.showExtraClinic === 'boolean') state.showExtraClinic = p.showExtraClinic;
       }
     } catch (_) {}
   }
@@ -698,7 +749,7 @@
   function applyTheme() {
     document.documentElement.classList.toggle('dark', state.darkMode);
     const btn = document.getElementById('theme-btn');
-    if (btn) btn.textContent = state.darkMode ? '☀️' : '🌙';
+    if (btn) btn.textContent = state.darkMode ? '☀️ Aydınlık' : '🌙 Karanlık';
   }
 
   function showToast(msg, tone = 'indigo') {
@@ -737,7 +788,7 @@
     const rows = CARDS.map(c => {
       const topicName = TOPICS.find(t => t.id === c.topic)?.name || c.topic;
       const front = `[${topicName} • ${c.tag}] ${c.q}`.replace(/\t|\n/g, ' ');
-      const back = `<b>${c.a}</b><br><br><i>Mekanizma:</i> ${c.why}<br><i>Sınav Tuzağı:</i> ${c.trap} (${c.page})`.replace(/\t|\n/g, ' ');
+      const dc = getDeepClinical(c); const back = `<b>${c.a}</b><br><br><b>Zincir:</b> ${dc.chain}<br><i>Mekanizma:</i> ${c.why}<br><i>Klinik:</i> ${dc.clinic}<br><i>Sınav Tuzağı:</i> ${c.trap} (${c.page})`.replace(/\t|\n/g, ' ');
       return `${front}\t${back}\tkarbonhidrat_${c.topic}`;
     });
     const blob = new Blob([rows.join('\n')], { type: 'text/tab-separated-values;charset=utf-8' });
@@ -830,6 +881,205 @@
   // 6. GÖRÜNÜM RENDER FONKSİYONLARI
   // =========================================================================
 
+
+  // =========================================================================
+  // DERİNLEŞTİRİLMİŞ KLİNİK NOTLAR & "NEDEN?" MEKANİZMA ZİNCİRLERİ
+  // =========================================================================
+  const DEEP_CLINICAL = {
+    c01: {
+      chain: 'Dihidroksiaseton (HOCH₂–CO–CH₂OH) → C1 ve C3 özdeş → Kiral karbon = 0 → Optik aktivite YOK',
+      clinic: 'Glikolizde Aldolazın ürettiği DHAP (Dihidroksiaseton fosfat), yağ dokusunda Gliserol 3-fosfata çevrilerek trigliserit omurgasını oluşturur (yağ dokusunda gliserokinaz olmadığından tek yoldur!).'
+    },
+    c02: {
+      chain: 'Galaktoz (C4-OH yukarı) → Gal-1-P → GALT (+ UDP-Glk) → UDP-Gal → 4-Epimeraz (NAD⁺) → UDP-Glikoz',
+      clinic: 'Galaktoz doğrudan glikolize giremez; önce C4 epimerizasyonu şarttır. Bu hat GALT basamağında tıkanırsa klasik galaktozemi (yenidoğanda sarılık, hepatomegali, katarakt, E. coli sepsisi) gelişir.'
+    },
+    c03: {
+      chain: 'Sükrozda Glikoz(C1)–O–Früktoz(C2) → Serbest aldehit/keto ucu YOK → Cu²⁺ indirgeyemez',
+      clinic: 'İdrarda bakır indirgeme (Benedict/Fehling) testi pozitif ama glikoz oksidaz negatifse, idrarda glikoz dışı indirgeyici bir şeker (Galaktoz, Früktoz, Laktoz veya L-ksilüloz) vardır; Sükroz bu testte NEGATİF kalır!'
+    },
+    c05: {
+      chain: 'Nişasta → α-Amilaz (sadece iç α-1,4 kırar) → Maltoz + Sınır Dekstrinleri → α-Glikozidaz / İzomaltaz → Glikoz',
+      clinic: 'Akut pankreatitte pankreatik α-amilaz kana sızar (serum amilaz ↑). Tip 2 DM’de Akarboz fırçamsı kenar α-glikozidazını inhibe ederek tokluk şeker pikini düşürür (yan etki: kolonda fermantasyonla gaz/şişkinlik).'
+    },
+    c06: {
+      chain: 'Bazolateral Na⁺-K⁺ ATPaz (hücre içi Na⁺ ↓) → Apikal SGLT-1 (2 Na⁺ + Glikoz içeri) → Bazolateral GLUT-2 (kana)',
+      clinic: 'Kolera gibi şiddetli ishallerde SGLT-1 sağlam kalır; Oral Rehidratasyon Sıvısına (ORS) glikoz + NaCl birlikte konur ki SGLT-1 suyu hızla geri çeksin. Böbrekte SGLT-2 inhibitörleri (Empagliflozin) glikoz geri emilimini kapatıp idrarla şeker attırır.'
+    },
+    c07: {
+      chain: 'Laktaz ↓ → Laktoz parçalanamaz → Kolona geçer → Ozmotik su çekimi (ishal) + Bakteriyel fermantasyon (H₂, CO₂, asit)',
+      clinic: 'Sekonder laktaz eksikliği rotavirüs gastroenteriti veya çölyak hastalığında villus hasarı sonrası geçici olarak gelişebilir; hidrojen nefes testi ile tanı konur.'
+    },
+    c08: {
+      chain: 'Glikoz (yüksüz) → GLUT ile girer → Heksokinaz (+ATP) → Glikoz 6-P (negatif yüklü) → GLUT’tan ÇIKAMAZ (hücre içi hapis)',
+      clinic: 'Hücre içi serbest glikoz sıfıra yakın tutulur; böylece pasif difüzyonla (GLUT) kandan hücreye sürekli yeni glikoz akışı sağlanır. Kasta Glikoz 6-fosfataz olmadığı için kasa giren glikoz bir daha asla kana dönemez!'
+    },
+    c09: {
+      chain: 'Açlık (~4.5 mM): Heksokinaz (Km 0.1 mM) %98 dolu → Beyin/kas beslenir | Tokluk (>10 mM): Glikokinaz (K₀.₅ 8 mM) hızlanır → KC depolar',
+      clinic: 'Glikokinaz pankreas β hücresinde "glikoz sensörü"dür; heterozigot kayıp mutasyonu MODY Tip 2’ye (hafif, kararlı açlık hiperglisemisi, genelde ilaçsız takip) yol açar.'
+    },
+    c10: {
+      chain: 'Enerji açlığı (AMP ↑) veya İnsülin (F-2,6-BP ↑) → PFK-1 AÇIK | Enerji bolluğu (ATP ↑, Sitrat ↑) veya Asidoz (H⁺ ↑) → PFK-1 KAPALI',
+      clinic: 'Kas PFK-1 eksikliği = Tarui Hastalığı (GSD Tip VII): Egzersizde kas krampları, miyoglobinüri ve eritrositlerde kısmi eksiklik nedeniyle kompanse hemolitik anemi görülür. Asidozda H⁺ iyonunun PFK-1’i inhibe etmesi, kasın kendini aşırı laktik asidozdan koruma frenidir!'
+    },
+    c11: {
+      chain: 'Glukagon → cAMP ↑ → PKA aktif → PFK-2/FBPaz-2 fosforillenir → FBPaz-2 AKTİF → F-2,6-BP ↓↓ → PFK-1 frenlenir & F-1,6-BPaz açılır',
+      clinic: 'Karaciğerin açlıkta "bencil" olmayıp glikozu kendi yakmak yerine beyne göndermesini sağlayan ana hormonal makastır. İnsülin tam tersini (defosforilasyon) yaparak toklukta karaciğer glikolizini açar.'
+    },
+    c12: {
+      chain: 'Arsenat (Pi taklitçisi) → GAPDH ile 1-Arseno-3-FG oluşur → Spontan hidroliz → PGK atlanır → Glikoliz sürer ama NET 0 ATP!',
+      clinic: 'Hücrede glikoz hızla tüketilir ama hiç ATP üretilemez (enerji açlığı). İyodoasetat ise GAPDH’ın aktif merkezindeki sistein -SH grubuna bağlanıp glikolizi tamamen keser.'
+    },
+    c13: {
+      chain: 'Sodyum Florür (F⁻) + Mg²⁺ + Pi → Florofosfat kompleksi → Enolaz aktif merkezi bloke → 2-FG → PEP durur',
+      clinic: 'Gri kapaklı kan tüpü (NaF + Potasyum okzalat) olmadan bekletilen tam kanda eritrositler saatte ~%5–7 glikoz tüketir ve hastada yalancı hipoglisemi saptanır.'
+    },
+    c14: {
+      chain: 'Piruvat Kinaz ↓ → Eritrositte ATP ↓↓ → Na⁺-K⁺ ATPaz bozulur → Zar sertleşir → Dalakta makrofaj yıkımı (Hemolitik anemi)',
+      clinic: 'Blokaj 2,3-BPG’nin ALTINDA kaldığı için eritrosit içinde 2,3-BPG birikir → Hb eğrisi sağa kayar → Dokulara O₂ kolay bırakılır → Hastalar düşük hemoglobini şaşırtıcı derecede iyi tolere eder!'
+    },
+    c15: {
+      chain: 'O₂ yok / Mitokondri yok → ETZ durur → NADH birikir, NAD⁺ biter → LDH (Piruvat + NADH → Laktat + NAD⁺) → GAPDH kurtulur!',
+      clinic: 'Sepsis, şok ve ağır hipokside dokulardan kana aşırı laktat dökülür → Yüksek anyon açıklı metabolik asidoz (Laktik Asidoz, kan laktatı >4 mmol/L acil mortalite göstergesidir).'
+    },
+    c16: {
+      chain: '1,3-BPG → Bisfosfogliserat mutaz → 2,3-BPG → Deoksi-Hb β zincirleri arasına bağlanır → T (gergin) form stabilize → O₂ dokuya bırakılır',
+      clinic: 'Yüksek rakımda, KOAH’ta ve kronik anemide 2,3-BPG artarak doku hipoksisini telafi eder. Banka kanında bekledikçe 2,3-BPG düşer; masif transfüzyonda ilk 24 saat doku O₂ sunumu geçici azalabilir.'
+    },
+    c17: {
+      chain: 'E1(TPP): CO₂ çıkar → E2(Lipoat): Asetil taşır + KoA’ya verir → E3(FAD→NAD⁺): Lipoatı oksitler & NADH üretir',
+      clinic: 'Piruvatın Asetil-KoA’ya dönüşümü tek yönlüdür. Bu yüzden karbonhidratlar yağa dönüşebilir (fazla glikoz → Asetil-KoA → Yağ asidi), ama çift karbonlu yağ asitleri asla net glikoza dönüşemez!'
+    },
+    c18: {
+      chain: 'İnsülin / Ca²⁺ → PDH Fosfataz AKTİF → E1-P defosforile → PDH AÇIK | Asetil-KoA / NADH / ATP ↑ → PDH Kinaz AKTİF → E1 fosforile → PDH KAPALI',
+      clinic: 'Egzersizde kasta Ca²⁺ artışı anında PDH’yi açıp aerobik enerjiyi fırlatır. Açlıkta yağ yakımı Asetil-KoA’yı artırınca PDH kapanır ve Piruvat glikoneojeneze (Piruvat karboksilaza) korunur.'
+    },
+    c19: {
+      chain: 'Tiamin (B1) ↓ → PDH (E1) + α-KGDH + Transketolaz kilitlenir → Glikoz verilirse Piruvat Laktata yığılır → Beyin ATP krizi!',
+      clinic: 'Wernicke ensefalopatisi triadı: Konfüzyon + Ataksi + Oftalmopleji! Kronik alkolik/malnütrisyonlu hastaya IV glikozdan ÖNCE mutlaka Tiamin verilir. Arsenit zehirlenmesinde (sarımsak kokulu nefes) antidot: Dimerkaprol (BAL).'
+    },
+    c20: {
+      chain: '1 Asetil-KoA → 3 NADH (7.5) + 1 FADH₂ (1.5) + 1 GTP (1) = 10 ATP | 1 Glikoz = 2 Asetil-KoA = 20 ATP (Krebs)',
+      clinic: 'Süksinat tiyokinaz basamağında üretilen GTP, karaciğer mitokondrisinde doğrudan glikoneojenez (PEPCK) veya nükleozid difosfat kinaz ile ATP dönüşümü için kullanılır.'
+    },
+    c21: {
+      chain: 'Hücre ATP harcar → ADP ↑, NAD⁺ ↑ → İzositrat DH (Ana hız kısıtlayıcı) hızlanır → Krebs döner → NADH/ATP artınca frenlenir',
+      clinic: 'IDH1/IDH2 somatik mutasyonları beyin gliomaları ve AML’de α-ketoglutarat yerine onkometabolit olan 2-hidroksiglutarat üretir (hedefli ilaçlar: Ivosidenib, Enasidenib).'
+    },
+    c22: {
+      chain: 'Floroasetat → Florositrat (Akonitazı kilitler) | Arsenit → α-KGDH (Lipoat -SH) | Malonat → Süksinat DH (Kompetitif)',
+      clinic: 'Süksinat Dehidrojenaz (ETZ Kompleks II) hem Krebs hem ETZ üyesidir; SDH gen mutasyonları kalıtsal paraganglioma ve feokromositoma sendromlarına yol açar.'
+    },
+    c23: {
+      chain: 'Sitozol NADH → İç zardan geçemez → Malat-Aspartat (NAD⁺ → 2.5 ATP → 32 ATP) vs Gliserol 3-P (FAD → 1.5 ATP → 30 ATP)',
+      clinic: 'Kalp ve karaciğer yüksek verimli Malat-Aspartat mekiğini (32 ATP) kullanırken; hızlı kasılan iskelet kası ve beyin hızlı ama 2 ATP daha az veren Gliserol 3-P mekiğini (30 ATP) tercih eder.'
+    },
+    c24: {
+      chain: 'Tokluk → ATP ↑ → İzositrat DH yavaşlar → Sitrat birikir → Sitozole çıkar → ATP-Sitrat Liyaz → Asetil-KoA (Yağ sentezi) + OAA → Malat → Malik Enzim (NADPH!)',
+      clinic: 'Hem sentezinin 1. basamağı (ALA sentaz) Krebs ara ürünü olan Süksinil-KoA + Glisin kullanır; porfirilerde bu çıkış yolu kritiktir.'
+    },
+    c25: {
+      chain: 'Glikoz 6-P → G6PD + 6-PG DH → 2 NADPH → Yağ/Steroid sentezi + Sitokrom P450 ilaç yıkımı + Glutatyon (GSH) rejenerasyonu',
+      clinic: 'NADPH eksikliğinde sadece eritrosit hemolizi değil, nötrofillerde NADPH oksidaz (solunum patlaması) da etkilenebilir; kronik granülomatöz hastalıkta NADPH oksidaz eksiktir.'
+    },
+    c26: {
+      chain: 'Oksidatif stres veya Lipojenez → NADPH tüketilir → NADP⁺ ↑ → G6PD üzerindeki inhibisyon kalkar → PPP hızlanır',
+      clinic: 'İnsülin toklukta G6PD gen ekspresyonunu artırır çünkü karaciğer ve yağ dokusunda yağ asidi sentezi için yoğun NADPH gerekir.'
+    },
+    c27: {
+      chain: 'Transketolaz (TPP/B1, 2C: Ketoz→Aldoz) + Transaldolaz (3C) → 3×5C (15C) ⇄ 2×6C (F6P) + 1×3C (GA3P)',
+      clinic: 'Tiamin (B1) eksikliğinin laboratuvar altın standardı: Eritrosit Transketolaz aktivitesi düşüktür ve tüpe TPP eklenince aktivite >%25 artar (TPP etkisi).'
+    },
+    c28: {
+      chain: 'G6PD ↓ + Bakla/Primakin/Enfeksiyon → NADPH ↓↓ → GSH-R durur → GSH biter → H₂O₂ & OH• ↑ → Hb çöker (Heinz) → Dalak ısırır (Bite cell) → HEMOLİZ!',
+      clinic: 'Akut hemolitik kriz tetikleyiciden 24–72 saat sonra başlar: ani solukluk, sarılık, bel/karın ağrısı, koyu çay/kola rengi idrar (hemoglobinüri). G6PD eksikliği sıtmaya (P. falciparum) karşı kısmi evrimsel koruma sağlar!'
+    },
+    c29: {
+      chain: 'O₂•⁻ → SOD → H₂O₂ → (+ Fe²⁺, Fenton) → OH• (En yıkıcı radikal!) → Zar PUFA saldırısı → Lipit peroksidasyonu',
+      clinic: 'Demir fazlalığında (hemokromatoz, sık transfüzyon) serbest Fe²⁺ artarak Fenton reaksiyonuyla karaciğer, kalp ve pankreasta ağır oksidatif hasar (bronz diyabet, kardiyomiyopati) yapar.'
+    },
+    c30: {
+      chain: 'UDP-Glikoz → UDP-Glikuronat (Bilirubin & ilaç konjugasyonu) | L-Gulonolakton oksidaz YOK → C vitamini dışarıdan şart!',
+      clinic: 'C vitamini eksikliğinde (Skorbüt) kollajen prolin/lizin hidroksilasyonu bozulur → diş eti kanaması, peteşi, yara iyileşmesinde gecikme. UDP-glikuronil transferaz eksikliğinde ise Crigler-Najjar / Gilbert sarılığı gelişir.'
+    },
+    c31: {
+      chain: 'Hiperglisemi → İnsülinsiz giriş (Lens, Retina, Schwann) → Aldoz Redüktaz (NADPH ↓) → Sorbitol birikir → Su çeker → Hücre şişer!',
+      clinic: 'Hem ozmotik şişme hem de NADPH’ın tüketilmesiyle glutatyon savunmasının zayıflaması birleşir → Diyabetik katarakt, periferik nöropati (eldiven-çorap uyuşması), retinopati ve nefropati.'
+    },
+    c32: {
+      chain: 'Aldolaz B ↓ + Früktoz/Sükroz → F-1-P birikir → Hücre içi Pi hapsedilir → ATP ↓↓ → Glikojen fosforilaz & GNG bloke → AĞIR HİPOGLİSEMİ!',
+      clinic: 'HFI’li bebek/çocuk tatlı ve meyvelerden içgüdüsel olarak tiksinir (çürük dişleri neredeyse hiç olmaz!). Sükroz, früktoz ve sorbitol diyetten çıkarılınca karaciğer ve büyüme tamamen normale döner.'
+    },
+    c33: {
+      chain: 'GALT ↓ + Anne sütü (Laktoz) → Gal-1-P birikir (KC/Beyin/Böbrek toksik!) + Galaktoz → Aldoz Redüktaz → Galaktitol (Katarakt!)',
+      clinic: 'Doğumdan günler sonra kusma, uzamış sarılık, hepatomegali, hipoglisemi, katarakt ve gram-negatif (E. coli) yenidoğan sepsisi! Yenidoğan topuk kanı taraması ve laktozsuz soya maması hayat kurtarır.'
+    },
+    c34: {
+      chain: 'Piruvat → Piruvat Karboksilaz (Mitokondri, Biotin) → OAA → Malat → Sitozol OAA → PEPCK (GTP) → PEP → ... → F-1,6-BPaz → G6Paz (ER) → Kan Glikozu',
+      clinic: 'Uzun açlıkta (18+ saat) karaciğer glikojeni bittiğinde beyin (günde ~120 g glikoz) ve eritrositleri hayatta tutan tek mekanizmadır.'
+    },
+    c35: {
+      chain: 'Açlık → Lipoliz ↑ → β-Oksidasyon → Asetil-KoA ↑↑ → PDH KAPATILIR + Piruvat Karboksilaz ZORUNLU AÇILIR → Piruvat Glikoza akar!',
+      clinic: 'Böylece yağ yıkımı kendi karbonunu glikoza veremese de hem ATP/NADH enerjisini hem de Asetil-KoA aktivasyon sinyalini sağlayarak glikoneojenezi ayakta tutar.'
+    },
+    c36: {
+      chain: 'Ağır egzersiz → Kas Glikoliz (2 ATP) → Laktat/Alanin → Kan → Karaciğer Glikoneojenez (6~P) → Glikoz → Kasa geri!',
+      clinic: 'Tip 2 DM’de 1. basamak ilaç olan Metformin, karaciğerde AMPK üzerinden glikoneojenezi baskılayarak özellikle sabah açlık kan şekerini hipoglisemi yapmadan düşürür (böbrek yetmezliğinde nadir laktik asidoz riski).'
+    },
+    c37: {
+      chain: 'Etanol → Alkol DH (+NADH) → Asetaldehit → Aldehit DH (+NADH) → NADH/NAD⁺ ↑↑ → Piruvat→Laktat & OAA→Malat → GNG KİLİTLENİR!',
+      clinic: 'Aç karnına yoğun alkol alan hasta acile terleme, konfüzyon veya koma ile geldiğinde kan şekeri mutlaka ölçülmelidir (alkol kokusu hipoglisemiyi maskeleyebilir!).'
+    },
+    c38: {
+      chain: 'Tokluk → İnsülin ↑ → PP-1 aktif → Glikojen Sentaz defosforile (AKTİF I) → UDP-Glikoz eklenir → Dallanma yapıcı α-(1,6) açar',
+      clinic: 'Andersen Hastalığı (GSD Tip IV — Dallanma yapıcı enzim eksikliği): Dallanmamış uzun zincirler çözünmez, hepatositlerde birikip erken çocuklukta karaciğer sirozuna yol açar.'
+    },
+    c39: {
+      chain: 'Açlık/Kaç-Savaş → Glukagon/Epinefrin → Fosforilaz a (AKTİF, PLP/B6) → G1P (%90) + Dallanma Kırıcı → Serbest Glikoz (%10)',
+      clinic: 'Fosforolizle (Pi ile) kırıldığı için G1P’tan G6P’a geçerken ATP harcanmaz — kasta acil depar anında 1 ATP ekstra kâr (glikojen biriminden 3 ATP net) sağlar!'
+    },
+    c40: {
+      chain: 'cAMP → PKA → (1) Fosforilaz Kinazı açar, (2) Sentazı kapatır, (3) İnhibitör-1’i açıp PP-1’i susturur! Kasta Ca²⁺ direkt δ-Kalmodulini açar.',
+      clinic: 'Ağır hipoglisemi komasındaki Tip 1 DM hastasına acilde IM/nazal Glukagon yapıldığında bu cAMP kaskadı saniyeler içinde karaciğer glikojenolizini patlatarak kan şekerini yükseltir (alkolik/aç hastada glikojen boşsa işe yaramaz!).'
+    },
+    c41: {
+      chain: 'Tip I (G6Paz ↓): Kana glikoz ÇIKAMAZ → G6P yığılır → Glikoliz (Laktat ↑) + PPP (Ürik asit ↑) + Lipojenez (TG ↑) | Tip V (Kas Fosforilaz ↓): Kas yakamaz → Kramp, Laktat artmaz!',
+      clinic: 'Von Gierke (Tip I) tedavisinde gece boyunca çiğ mısır nişastası verilir (yavaş sindirilip sürekli glikoz sağlar). McArdle (Tip V) hastalarında egzersizden 10 dk sonra serbest yağ asitleri devreye girince ağrı hafifler ("Second Wind" fenomeni).'
+    },
+    c42: {
+      chain: 'Kan Glikozu ↑ → β-Hücre GLUT-2 → Glikokinaz → ATP ↑ → K⁺ kanalı kapanır → Depolarizasyon → Ca²⁺ ↑ → İnsülin + C-peptid (1:1) salınır',
+      clinic: 'Hipoglisemi araştırmasında İnsülin yüksek + C-peptid DÜŞÜK ise gizli dışarıdan insülin enjeksiyonu (faktisyöz hipoglisemi); ikisi de YÜKSEK ise insülinoma veya sülfonilüre alımı düşünülür!'
+    },
+    c43: {
+      chain: 'Glikoz <68 mg/dL → İnsülin ↓, Glukagon & Epinefrin ↑ (dakikalar içinde) → Uzun açlıkta Kortizol & GH ↑ (saatler içinde insülin direnci + GNG)',
+      clinic: 'Uzun süreli steroid (kortizol) tedavisi alan hastalarda glikoneojenez artışı ve periferik insülin direnci nedeniyle "steroid diyabeti" gelişebilir.'
+    },
+    c44: {
+      chain: 'İnsülinopeni (Tip 1) veya İnsülin Direnci (Tip 2) → Hiperglisemi → Böbrek eşiği (~180 mg/dL) aşılır → Glikozüri → Ozmotik diürez (Poliüri → Polidipsi)',
+      clinic: 'ADA 2026: Asemptomatik hastada tanı için aynı örnekte 2 farklı testin (ör. APG ≥126 VE HbA1c ≥%6,5) veya farklı günlerde 2 testin pozitifliği gerekir.'
+    },
+    c45: {
+      chain: 'Yüksek Plazma Glikozu → Eritrosit içine pasif girer → HbA β-zincir N-terminal Valin ile non-enzimatik Schiff bazı → Kararlı Ketoamin (HbA1c)',
+      clinic: 'Eritrosit ömrü 120 gün olduğundan HbA1c son 8–10 haftayı gösterir. Gebelik, hemolitik anemi, yakın kanama/transfüzyon veya ağır demir eksikliğinde HbA1c yanıltıcıdır → Fruktozamin (1–2 hafta) istenir.'
+    },
+    c46: {
+      chain: 'İnsülin YOK → Lipoliz ↑↑ → KC Mitokondride Asetil-KoA yığılır → Ketogenez (β-OHB %78, Asetoasetat %20, Aseton %2) → Yüksek Anyon Açıklı Asidoz (DKA)',
+      clinic: 'DKA acil tedavisi: (1) IV Sıvı (SF), (2) IV Regüler İnsülin (lipolizi ve ketogenezi anında durdurur), (3) Potasyum (K⁺) replasmanı (insülin K⁺’u hücre içine sokar, hipokalemi öldürücüdür!).'
+    },
+    c47: {
+      chain: 'Glikoz <70 → Otonom/Adrenerjik uyarı (çarpıntı, terleme, titreme) → Glikoz <54 → Nöroglikopeni (konfüzyon, konuşma bozukluğu, nöbet, koma)',
+      clinic: 'Beta-bloker kullanan diyabetlilerde çarpıntı ve titreme maskelenir ama kolinerjik olan TERLEME korunur! Bilinç açıksa 15–20 g hızlı karbonhidrat (15/15 kuralı), kapalıysa IV Dekstroz veya IM Glukagon.'
+    }
+  };
+
+  function getDeepClinical(card) {
+    if (DEEP_CLINICAL[card.id]) return DEEP_CLINICAL[card.id];
+    return {
+      chain: `${card.tag} → ${card.a}`,
+      clinic: `${card.why} (${card.trap})`
+    };
+  }
+
   function renderAnki() {
     const q = getAnkiQueue();
     const card = pickNextAnkiCard();
@@ -884,36 +1134,47 @@
                 <p class="text-base sm:text-xl font-extrabold leading-relaxed text-slate-900 dark:text-white">${card.q}</p>
               </div>
 
-              <!-- Kademeli İpucu (Scaffolding) -->
+              <!-- Kademeli İpucu (Açılır / Kapanır Toggle) -->
               ${!state.flipped ? `
-                <div class="pt-1">
+                <div class="pt-1 space-y-2">
+                  <button data-action="toggle-hint" class="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition">
+                    ${state.showHint ? '🙈 İpucunu Gizle (H)' : '💡 Hafif İpucu Göster (H)'}
+                  </button>
                   ${state.showHint ? `
                     <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs sm:text-sm text-amber-900 dark:text-amber-200 fade-in">
                       <strong>💡 İpucu:</strong> ${card.hint}
                     </div>
-                  ` : `
-                    <button data-action="show-hint" class="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-bold hover:bg-amber-100 transition">
-                      💡 Hafif İpucu Göster (Takıldıysan)
-                    </button>
-                  `}
+                  ` : ''}
                 </div>
               ` : `
-                <!-- Cevap & Öğretici Katman -->
+                <!-- Cevap, Sebep-Sonuç Mekanizma Zinciri & Derin Klinik Katman -->
                 <div class="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 fade-in">
-                  <div class="p-4 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
+                  <div class="p-4 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/80">
                     <div class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 mb-1">✅ Net Spot Cevap</div>
                     <p class="text-sm sm:text-base font-extrabold text-emerald-950 dark:text-emerald-100 leading-relaxed">${card.a}</p>
                   </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-800/50">
-                      <div class="text-[11px] font-extrabold text-indigo-700 dark:text-indigo-300 mb-1">🧠 Neden? (Öğretici Mekanizma)</div>
-                      <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${card.why}</p>
+                  <!-- Neden? Sebep-Sonuç Mekanizma Zinciri -->
+                  <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/45 border border-indigo-200 dark:border-indigo-800/80 space-y-2">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">🧠 Neden Böyle Oluyor? (Mekanizma Zinciri)</div>
+                    <div class="mono text-[11px] sm:text-xs font-bold px-3 py-2 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-indigo-200/80 dark:border-indigo-800 text-indigo-800 dark:text-indigo-200 leading-relaxed">
+                      ${getDeepClinical(card).chain}
                     </div>
-                    <div class="p-3.5 rounded-2xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-800/50">
-                      <div class="text-[11px] font-extrabold text-rose-700 dark:text-rose-300 mb-1">⚠️ Sınav / Komite Tuzağı</div>
+                    <p class="text-xs sm:text-[13px] leading-relaxed text-slate-700 dark:text-slate-200">${card.why}</p>
+                  </div>
+
+                  <!-- Sınav Tuzağı + İsteğe Bağlı Ekstra Klinik Kutusu -->
+                  <div class="grid grid-cols-1 ${state.showExtraClinic ? 'sm:grid-cols-2' : ''} gap-3">
+                    <div class="p-3.5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/70">
+                      <div class="text-[11px] font-extrabold uppercase tracking-wider text-rose-700 dark:text-rose-300 mb-1">⚠️ Sınav / Komite Tuzağı</div>
                       <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${card.trap}</p>
                     </div>
+                    ${state.showExtraClinic ? `
+                      <div class="p-3.5 rounded-2xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/70 fade-in">
+                        <div class="text-[11px] font-extrabold uppercase tracking-wider text-sky-700 dark:text-sky-300 mb-1">🏥 Ekstra Hasta Başı Klinik &amp; Tedavi Notu</div>
+                        <p class="text-xs leading-relaxed text-slate-700 dark:text-slate-200">${getDeepClinical(card).clinic}</p>
+                      </div>
+                    ` : ''}
                   </div>
                 </div>
               `}
@@ -1007,7 +1268,9 @@
                 <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 fade-in">
                   <div class="text-xs font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">⚡ SPOT CEVAP</div>
                   <p class="text-sm sm:text-base font-extrabold text-emerald-950 dark:text-emerald-100">${card.a}</p>
-                  <p class="text-xs text-rose-700 dark:text-rose-300 mt-2"><strong>Tuzak:</strong> ${card.trap}</p>
+                  <div class="mono text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mt-2 px-2.5 py-1.5 rounded-lg bg-white/70 dark:bg-slate-900/70 border border-indigo-200/60 dark:border-indigo-800/60">${getDeepClinical(card).chain}</div>
+                  ${state.showExtraClinic ? `<p class="text-xs text-sky-800 dark:text-sky-300 mt-2"><strong>🏥 Ekstra Klinik:</strong> ${getDeepClinical(card).clinic}</p>` : ''}
+                  <p class="text-xs text-rose-700 dark:text-rose-300 mt-1"><strong>⚠️ Tuzak:</strong> ${card.trap}</p>
                 </div>
               ` : `
                 <div class="text-xs font-semibold text-amber-600 dark:text-amber-400">Cevabı görmek için karta tıkla…</div>
@@ -1034,21 +1297,40 @@
   }
 
   function renderExam() {
+    const isOpen = state.examMode === 'open';
+    const activeBank = isOpen ? OPEN_BANK : EXAM_BANK;
+
     if (!state.examActive && !state.examFinished) {
       return `
         <div class="max-w-3xl mx-auto space-y-4 fade-in">
           <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
             <div>
               <span class="px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold">📝 ÖLÇME &amp; DEĞERLENDİRME MERKEZİ</span>
-              <h2 class="text-xl font-extrabold mt-2">Kendini Gerçek Komite / TUS Sorularıyla Sına</h2>
-              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Sınav sonunda konu bazlı başarı karnen çıkarılır, gelişim eğrine kaydedilir ve yanlış yaptığın konuların Anki kartları tek tıkla açılır.</p>
+              <h2 class="text-xl font-extrabold mt-2">Aktif Geri Çağırma (Açık Uçlu) veya 5 Şıklı Sınav</h2>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Kısa cevaplı modda tam doğru yazarsan otomatik <strong>Biliyorum</strong> sayılır; bilemezsen <strong>3 kademeli öz-değerlendirme</strong> (Hiç Bilmiyorum • Görünce Tanıdım • Dilimin Ucundaydı) ile unutma eğrin güncellenir.</p>
+            </div>
+
+            <!-- Sınav Türü Seçici -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button data-action="exam-mode" data-mode="open" class="text-left p-4 rounded-2xl border-2 transition ${
+                isOpen ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/50' : 'border-slate-200 dark:border-slate-800 hover:border-indigo-400'
+              }">
+                <div class="text-sm font-extrabold text-indigo-700 dark:text-indigo-300">✍️ Kısa Cevaplı (Açık Uçlu)</div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">Tek cevap yaz → Otomatik kontrol + 3 kademeli hafıza derecelendirmesi (${OPEN_BANK.length} soru). Kalıcılığı en yüksek mod!</p>
+              </button>
+              <button data-action="exam-mode" data-mode="mcq" class="text-left p-4 rounded-2xl border-2 transition ${
+                !isOpen ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/50' : 'border-slate-200 dark:border-slate-800 hover:border-indigo-400'
+              }">
+                <div class="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">📋 5 Şıklı Sınav (A–E)</div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">TUS / Komite formatında 5 şıklı klinik vaka ve spot soruları (${EXAM_BANK.length} soru).</p>
+              </button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
                 <label class="font-extrabold block">Konu Kapsamı</label>
                 <select data-action="exam-topic" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-semibold">
-                  <option value="all" ${state.examTopic === 'all' ? 'selected' : ''}>Karışık Tüm Konular (${EXAM_BANK.length} Soru)</option>
+                  <option value="all" ${state.examTopic === 'all' ? 'selected' : ''}>Karışık Tüm Konular (${activeBank.length} Soru)</option>
                   ${TOPICS.map(t => `<option value="${t.id}" ${state.examTopic === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
                 </select>
               </div>
@@ -1056,26 +1338,26 @@
               <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
                 <label class="font-extrabold block">Soru Sayısı</label>
                 <div class="flex gap-2">
-                  ${[5, 10, 16].map(n => `
+                  ${[5, 10, activeBank.length].map(n => `
                     <button data-action="exam-size" data-val="${n}" class="flex-1 py-2 rounded-xl font-extrabold border transition ${
                       state.examSize === n ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700'
-                    }">${n === 16 ? 'Tümü (16)' : `${n} Soru`}</button>
+                    }">${n === activeBank.length ? `Tümü (${n})` : `${n} Soru`}</button>
                   `).join('')}
                 </div>
               </div>
             </div>
 
             <button data-action="start-exam" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-extrabold shadow-sm transition">
-              🚀 Sınavı Başlat
+              🚀 ${isOpen ? 'Kısa Cevaplı Aktif Geri Çağırma Sınavını Başlat' : '5 Şıklı Komite Sınavını Başlat'}
             </button>
 
             ${state.examHistory.length > 0 ? `
               <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Geçmiş Denemelerin</div>
+                <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Geçmiş Ölçme-Değerlendirme Kayıtların</div>
                 <div class="space-y-1.5">
                   ${state.examHistory.slice(-5).reverse().map(h => `
                     <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs">
-                      <span class="font-semibold">${h.date}</span>
+                      <span class="font-semibold">${h.date} • ${h.modeLabel || 'Sınav'}</span>
                       <span class="mono font-extrabold ${h.pct >= 80 ? 'text-emerald-600' : h.pct >= 60 ? 'text-amber-600' : 'text-rose-600'}">${h.score}/${h.total} (%${h.pct})</span>
                     </div>
                   `).join('')}
@@ -1087,28 +1369,41 @@
       `;
     }
 
+    // SINAV SONU KARNESİ
     if (state.examFinished) {
       const qs = state.examQuestions;
-      let correct = 0;
+      let scorePts = 0;
       const byTopic = {};
+      const tiers = { exact: 0, tip: 0, recognized: 0, none: 0 };
+
       qs.forEach(q => {
-        if (!byTopic[q.topic]) byTopic[q.topic] = { ok: 0, total: 0 };
+        if (!byTopic[q.topic]) byTopic[q.topic] = { pts: 0, total: 0 };
         byTopic[q.topic].total += 1;
-        if (state.examAnswers[q.id] === q.ans) {
-          correct += 1;
-          byTopic[q.topic].ok += 1;
+        if (isOpen) {
+          const rec = state.examAnswers[q.id] || { status: 'none' };
+          const st = rec.status || 'none';
+          tiers[st] = (tiers[st] || 0) + 1;
+          const pt = st === 'exact' ? 1 : st === 'tip' ? 0.75 : st === 'recognized' ? 0.35 : 0;
+          scorePts += pt;
+          byTopic[q.topic].pts += pt;
+        } else {
+          if (state.examAnswers[q.id] === q.ans) {
+            scorePts += 1;
+            byTopic[q.topic].pts += 1;
+          }
         }
       });
-      const pct = qs.length ? Math.round((correct / qs.length) * 100) : 0;
-      const level = pct >= 85 ? '🏆 İleri Düzey (Sınava Hazır)' : pct >= 65 ? '📈 Orta-İyi (Eksikleri Kapat)' : '🔁 Temel Düzey (Anki Tekrarı Şart)';
+
+      const pct = qs.length ? Math.round((scorePts / qs.length) * 100) : 0;
+      const level = pct >= 85 ? '🏆 İleri Düzey (Sınava Hazır)' : pct >= 65 ? '📈 Orta-İyi (Eksikleri Kapat)' : '🔁 Temel Düzey (Anki Tekrarı Önerilir)';
 
       return `
         <div class="max-w-3xl mx-auto space-y-4 fade-in">
           <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400">ÖLÇME &amp; DEĞERLENDİRME KARNESİ</div>
-                <h2 class="text-2xl font-extrabold mt-0.5">${correct} / ${qs.length} Doğru (%${pct})</h2>
+                <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400">ÖLÇME &amp; DEĞERLENDİRME KARNESİ (${isOpen ? 'Kısa Cevaplı' : '5 Şıklı'})</div>
+                <h2 class="text-2xl font-extrabold mt-0.5">${Number(scorePts.toFixed(1))} / ${qs.length} Puan (%${pct})</h2>
                 <p class="text-xs font-bold text-slate-500 mt-1">${level} • Süre: ${state.examElapsedSec} sn</p>
               </div>
               <div class="flex gap-2">
@@ -1117,16 +1412,36 @@
               </div>
             </div>
 
-            <!-- Konu Bazlı Başarı -->
+            ${isOpen ? `
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                  <div class="mono text-lg font-extrabold text-emerald-600 dark:text-emerald-400">${tiers.exact}</div>
+                  <div class="text-[11px] font-bold">✅ Tam Doğru</div>
+                </div>
+                <div class="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
+                  <div class="mono text-lg font-extrabold text-indigo-600 dark:text-indigo-400">${tiers.tip}</div>
+                  <div class="text-[11px] font-bold">🤏 Dilimin Ucundaydı</div>
+                </div>
+                <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                  <div class="mono text-lg font-extrabold text-amber-600 dark:text-amber-400">${tiers.recognized}</div>
+                  <div class="text-[11px] font-bold">👀 Görünce Tanıdım</div>
+                </div>
+                <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800">
+                  <div class="mono text-lg font-extrabold text-rose-600 dark:text-rose-400">${tiers.none}</div>
+                  <div class="text-[11px] font-bold">❌ Hiç Bilmiyorum</div>
+                </div>
+              </div>
+            ` : ''}
+
             <div class="space-y-2">
               <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Konu Bazlı Performans &amp; Hızlı Kurtarma</div>
               ${Object.entries(byTopic).map(([tid, st]) => {
-                const tp = Math.round((st.ok / st.total) * 100);
+                const tp = Math.round((st.pts / st.total) * 100);
                 return `
                   <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <span class="font-bold">${getTopicName(tid)}</span>
                     <div class="flex items-center gap-2">
-                      <span class="mono font-extrabold ${tp >= 80 ? 'text-emerald-600' : 'text-rose-600'}">${st.ok}/${st.total} (%${tp})</span>
+                      <span class="mono font-extrabold ${tp >= 80 ? 'text-emerald-600' : 'text-rose-600'}">%${tp}</span>
                       ${tp < 100 ? `<button data-action="jump-topic-anki" data-topic="${tid}" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-bold">Anki’de Çalış →</button>` : ''}
                     </div>
                   </div>
@@ -1134,16 +1449,29 @@
               }).join('')}
             </div>
 
-            <!-- Soru Soru Çözüm İncelemesi -->
             <div class="space-y-2.5 pt-2">
               <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Detaylı Çözüm Anahtarı</div>
               ${qs.map((q, idx) => {
-                const userAns = state.examAnswers[q.id];
-                const ok = userAns === q.ans;
+                if (isOpen) {
+                  const rec = state.examAnswers[q.id] || { text: '', status: 'none' };
+                  const ok = rec.status === 'exact';
+                  const tagTxt = rec.status === 'exact' ? '✅ Tam Doğru' : rec.status === 'tip' ? '🤏 Dilimin Ucundaydı' : rec.status === 'recognized' ? '👀 Görünce Tanıdım' : '❌ Hiç Bilmiyorum';
+                  return `
+                    <div class="p-3.5 rounded-2xl border text-xs ${ok ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900' : 'bg-rose-50/50 dark:bg-rose-950/25 border-rose-200 dark:border-rose-900'}">
+                      <div class="flex items-center justify-between gap-2 font-bold mb-1">
+                        <span>${idx + 1}. ${q.q}</span>
+                        <span class="shrink-0">${tagTxt}</span>
+                      </div>
+                      <div class="text-slate-600 dark:text-slate-300"><strong>Senin Cevabın:</strong> ${rec.text || '—'} &nbsp;|&nbsp; <strong>Doğru:</strong> ${q.display}</div>
+                      <div class="text-slate-600 dark:text-slate-300 mt-1">${q.exp}</div>
+                    </div>
+                  `;
+                }
+                const ok = state.examAnswers[q.id] === q.ans;
                 return `
                   <div class="p-3.5 rounded-2xl border text-xs ${ok ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900' : 'bg-rose-50/60 dark:bg-rose-950/25 border-rose-200 dark:border-rose-900'}">
                     <div class="font-bold mb-1">${ok ? '✅' : '❌'} ${idx + 1}. ${q.q}</div>
-                    <div class="text-slate-600 dark:text-slate-300"><strong>Doğru Cevap:</strong> ${q.opts[q.ans]}</div>
+                    <div class="text-slate-600 dark:text-slate-300"><strong>Doğru Cevap:</strong> ${['A','B','C','D','E'][q.ans]}) ${q.opts[q.ans]}</div>
                     <div class="text-slate-600 dark:text-slate-300 mt-1">${q.exp}</div>
                   </div>
                 `;
@@ -1154,15 +1482,91 @@
       `;
     }
 
-    // Aktif sınav ekranı
+    // AKTİF SINAV EKRANI
     const q = state.examQuestions[state.examIndex];
+    const isLast = state.examIndex === state.examQuestions.length - 1;
+
+    // A) KISA CEVAPLI (AÇIK UÇLU) AKTİF GERİ ÇAĞIRMA
+    if (isOpen) {
+      const rec = state.examAnswers[q.id] || { text: '', status: null, revealed: false };
+      return `
+        <div class="max-w-3xl mx-auto space-y-4 fade-in">
+          <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span class="font-extrabold text-indigo-600 dark:text-indigo-400">✍️ Açık Uçlu Soru ${state.examIndex + 1} / ${state.examQuestions.length} • ${getTopicName(q.topic)}</span>
+            <span class="mono font-bold text-slate-500">Tamamlanan: ${Object.values(state.examAnswers).filter(x => x && x.status).length}/${state.examQuestions.length}</span>
+          </div>
+
+          <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <p class="text-base sm:text-lg font-extrabold leading-relaxed">${q.q}</p>
+
+            ${!rec.revealed ? `
+              <div class="space-y-3">
+                <input id="open-answer-input" type="text" value="${(rec.text || '').replace(/"/g, '&quot;')}" placeholder="Tek cevap yaz ve Enter’a bas (ör. Enolaz, PFK-1, G6PD)…"
+                  class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-indigo-200 dark:border-indigo-800 focus:border-indigo-500 outline-none text-sm font-bold" />
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <button data-action="open-skip-reveal" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold">
+                    Hatırlayamadım, Cevabı Göster
+                  </button>
+                  <button data-action="open-check" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-extrabold shadow-sm">
+                    ✓ Cevabımı Kontrol Et (Enter)
+                  </button>
+                </div>
+              </div>
+            ` : rec.status === 'exact' ? `
+              <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700 space-y-1.5 fade-in">
+                <div class="text-sm font-extrabold text-emerald-700 dark:text-emerald-300">✅ Tam Doğru! Direkt "Biliyorum" olarak kaydedildi!</div>
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-200">Doğru Cevap: <span class="text-emerald-700 dark:text-emerald-300">${q.display}</span></div>
+                <p class="text-xs text-slate-600 dark:text-slate-300">${q.exp}</p>
+              </div>
+              <div class="flex justify-end">
+                ${!isLast
+                  ? `<button data-action="exam-next" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold">Sonraki Soru ▶</button>`
+                  : `<button data-action="finish-exam" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">✓ Sınavı Bitir &amp; Karneyi Gör</button>`}
+              </div>
+            ` : `
+              <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 space-y-1.5 fade-in">
+                <div class="text-xs font-extrabold text-amber-800 dark:text-amber-300">Doğru Cevap: <span class="text-base text-slate-900 dark:text-white ml-1">${q.display}</span></div>
+                ${rec.text ? `<div class="text-xs text-slate-500">Senin yazdığın: <em>${rec.text}</em></div>` : ''}
+                <p class="text-xs text-slate-700 dark:text-slate-200 pt-1">${q.exp}</p>
+              </div>
+
+              <!-- 3 Aşamalı Öz-Değerlendirme (Metacognitive Rating) -->
+              <div class="space-y-2 pt-1">
+                <div class="text-xs font-extrabold text-slate-500 dark:text-slate-400">Hafıza durumunu dürüstçe seç (SM-2 unutma eğrin buna göre güncellenir):</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button data-action="open-self-rate" data-status="none" class="p-3 rounded-xl border text-left transition ${
+                    rec.status === 'none' ? 'bg-rose-600 text-white border-rose-600' : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 hover:border-rose-500'
+                  }">
+                    <div class="text-xs font-extrabold">❌ Hiç Bilmiyorum</div>
+                    <div class="text-[10px] opacity-85 mt-0.5">0 puan • Acil Anki tekrarına atar</div>
+                  </button>
+                  <button data-action="open-self-rate" data-status="recognized" class="p-3 rounded-xl border text-left transition ${
+                    rec.status === 'recognized' ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 hover:border-amber-500'
+                  }">
+                    <div class="text-xs font-extrabold">👀 Görünce Tanıdım</div>
+                    <div class="text-[10px] opacity-85 mt-0.5">Tanıma var, geri çağırma zayıf (Zor)</div>
+                  </button>
+                  <button data-action="open-self-rate" data-status="tip" class="p-3 rounded-xl border text-left transition ${
+                    rec.status === 'tip' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 hover:border-indigo-500'
+                  }">
+                    <div class="text-xs font-extrabold">🤏 Dilimin Ucundaydı</div>
+                    <div class="text-[10px] opacity-85 mt-0.5">Yazım farkı / neredeyse doğru</div>
+                  </button>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    // B) 5 ŞIKLI ÇOKTAN SEÇMELİ (A–E)
     const chosen = state.examAnswers[q.id];
     const answeredCount = Object.keys(state.examAnswers).length;
-
     return `
       <div class="max-w-3xl mx-auto space-y-4 fade-in">
         <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-          <span class="font-extrabold text-indigo-600 dark:text-indigo-400">Soru ${state.examIndex + 1} / ${state.examQuestions.length} • ${getTopicName(q.topic)}</span>
+          <span class="font-extrabold text-indigo-600 dark:text-indigo-400">5 Şıklı Soru ${state.examIndex + 1} / ${state.examQuestions.length} • ${getTopicName(q.topic)}</span>
           <span class="mono font-bold text-slate-500">İşaretlenen: ${answeredCount}/${state.examQuestions.length}</span>
         </div>
 
@@ -1176,7 +1580,7 @@
                   class="w-full text-left p-3.5 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center gap-3 ${
                     sel ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 hover:border-indigo-400'
                   }">
-                  <span class="w-6 h-6 rounded-lg flex items-center justify-center mono text-xs font-extrabold shrink-0 ${sel ? 'bg-white/20 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700'}">${['A','B','C','D'][idx]}</span>
+                  <span class="w-6 h-6 rounded-lg flex items-center justify-center mono text-xs font-extrabold shrink-0 ${sel ? 'bg-white/20 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700'}">${['A','B','C','D','E'][idx]}</span>
                   <span>${opt}</span>
                 </button>
               `;
@@ -1185,7 +1589,7 @@
 
           <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
             <button data-action="exam-prev" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold" ${state.examIndex === 0 ? 'disabled' : ''}>◀ Önceki</button>
-            ${state.examIndex < state.examQuestions.length - 1 ? `
+            ${!isLast ? `
               <button data-action="exam-next" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Sonraki ▶</button>
             ` : `
               <button data-action="finish-exam" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm">✓ Sınavı Bitir &amp; Karneyi Gör</button>
@@ -1401,6 +1805,13 @@
   }
 
   function updateNavUI() {
+    const cBtn = document.getElementById('clinic-mode-btn');
+    if (cBtn) {
+      cBtn.textContent = state.showExtraClinic ? '🏥 Ekstra Klinik: Açık' : '🏥 Ekstra Klinik: Kapalı';
+      cBtn.className = state.showExtraClinic
+        ? 'px-2.5 py-1.5 rounded-lg border border-sky-500 bg-sky-600 text-white text-xs font-bold transition whitespace-nowrap shadow-sm'
+        : 'px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition whitespace-nowrap';
+    }
     ['anki', 'turbo', 'exam', 'stats'].forEach(t => {
       const b = document.getElementById(`nav-${t}`);
       if (!b) return;
@@ -1448,6 +1859,11 @@
       applyTheme();
       saveLocal();
       render();
+    } else if (action === 'toggle-clinic-mode') {
+      state.showExtraClinic = !state.showExtraClinic;
+      saveLocal();
+      showToast(state.showExtraClinic ? 'Ekstra Klinik & Tedavi notları açıldı' : 'Sade Temel Bilim modu aktif (Ekstra Klinik gizli)', 'indigo');
+      render();
     } else if (action === 'open-sync') {
       state.syncModalOpen = true;
       renderSyncModal();
@@ -1470,8 +1886,8 @@
       }
     } else if (action === 'export-tsv') {
       exportAnkiTSV();
-    } else if (action === 'show-hint') {
-      state.showHint = true;
+    } else if (action === 'toggle-hint') {
+      state.showHint = !state.showHint;
       render();
     } else if (action === 'flip-anki') {
       state.flipped = true;
@@ -1502,12 +1918,17 @@
       state.turboIndex += 1;
       state.turboRevealed = false;
       render();
+    } else if (action === 'exam-mode') {
+      state.examMode = btn.getAttribute('data-mode');
+      const maxLen = state.examMode === 'open' ? OPEN_BANK.length : EXAM_BANK.length;
+      if (state.examSize > maxLen) state.examSize = maxLen;
+      render();
     } else if (action === 'exam-size') {
       state.examSize = Number(btn.getAttribute('data-val'));
       render();
     } else if (action === 'start-exam') {
-      let pool = EXAM_BANK.filter(q => state.examTopic === 'all' || q.topic === state.examTopic);
-      // Shuffle
+      const bank = state.examMode === 'open' ? OPEN_BANK : EXAM_BANK;
+      let pool = bank.filter(q => state.examTopic === 'all' || q.topic === state.examTopic);
       pool = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(state.examSize, pool.length));
       state.examQuestions = pool;
       state.examAnswers = {};
@@ -1516,6 +1937,63 @@
       state.examFinished = false;
       state.examStartTime = Date.now();
       render();
+      const inp = document.getElementById('open-answer-input');
+      if (inp) inp.focus();
+    } else if (action === 'open-check') {
+      const q = state.examQuestions[state.examIndex];
+      const inp = document.getElementById('open-answer-input');
+      const txt = inp ? inp.value.trim() : '';
+      const matched = isOpenAnswerMatch(txt, q.accepted);
+      if (matched) {
+        state.examAnswers[q.id] = { text: txt, status: 'exact', revealed: true };
+        if (q.cardId) applySM2(q.cardId, 4); // Direkt biliyorum -> SM-2 Kolay!
+        showToast('Tam doğru! Biliyorum olarak kaydedildi.', 'emerald');
+      } else {
+        state.examAnswers[q.id] = { text: txt, status: null, revealed: true };
+      }
+      render();
+    } else if (action === 'open-skip-reveal') {
+      const q = state.examQuestions[state.examIndex];
+      const inp = document.getElementById('open-answer-input');
+      const txt = inp ? inp.value.trim() : '';
+      state.examAnswers[q.id] = { text: txt, status: null, revealed: true };
+      render();
+    } else if (action === 'open-self-rate') {
+      const q = state.examQuestions[state.examIndex];
+      const st = btn.getAttribute('data-status'); // 'none' | 'recognized' | 'tip'
+      const prev = state.examAnswers[q.id] || { text: '', revealed: true };
+      state.examAnswers[q.id] = { ...prev, status: st, revealed: true };
+      if (q.cardId) {
+        const sm2Q = st === 'tip' ? 3 : st === 'recognized' ? 2 : 1;
+        applySM2(q.cardId, sm2Q);
+      }
+      if (state.examIndex < state.examQuestions.length - 1) {
+        state.examIndex += 1;
+        render();
+        const inp = document.getElementById('open-answer-input');
+        if (inp) inp.focus();
+      } else {
+        // Son soruyu derecelendirince direkt karneyi aç
+        state.examActive = false;
+        state.examFinished = true;
+        state.examElapsedSec = Math.max(1, Math.round((Date.now() - state.examStartTime) / 1000));
+        let pts = 0;
+        state.examQuestions.forEach(item => {
+          const r = state.examAnswers[item.id] || {};
+          pts += r.status === 'exact' ? 1 : r.status === 'tip' ? 0.75 : r.status === 'recognized' ? 0.35 : 0;
+        });
+        const pct = Math.round((pts / state.examQuestions.length) * 100);
+        state.examHistory.push({
+          date: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+          modeLabel: 'Açık Uçlu',
+          score: Number(pts.toFixed(1)),
+          total: state.examQuestions.length,
+          pct
+        });
+        saveLocal();
+        showToast(`Açık uçlu sınav bitti: %${pct} hakimiyet!`, pct >= 70 ? 'emerald' : 'amber');
+        render();
+      }
     } else if (action === 'exam-pick') {
       const qid = btn.getAttribute('data-qid');
       const idx = Number(btn.getAttribute('data-idx'));
@@ -1527,16 +2005,26 @@
     } else if (action === 'exam-next') {
       if (state.examIndex < state.examQuestions.length - 1) state.examIndex += 1;
       render();
+      const inp = document.getElementById('open-answer-input');
+      if (inp) inp.focus();
     } else if (action === 'finish-exam') {
       state.examActive = false;
       state.examFinished = true;
       state.examElapsedSec = Math.max(1, Math.round((Date.now() - state.examStartTime) / 1000));
       let score = 0;
-      state.examQuestions.forEach(q => { if (state.examAnswers[q.id] === q.ans) score += 1; });
+      if (state.examMode === 'open') {
+        state.examQuestions.forEach(item => {
+          const r = state.examAnswers[item.id] || {};
+          score += r.status === 'exact' ? 1 : r.status === 'tip' ? 0.75 : r.status === 'recognized' ? 0.35 : 0;
+        });
+      } else {
+        state.examQuestions.forEach(q => { if (state.examAnswers[q.id] === q.ans) score += 1; });
+      }
       const pct = Math.round((score / state.examQuestions.length) * 100);
       state.examHistory.push({
         date: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
-        score,
+        modeLabel: state.examMode === 'open' ? 'Açık Uçlu' : '5 Şıklı',
+        score: Number(score.toFixed(1)),
         total: state.examQuestions.length,
         pct
       });
@@ -1579,6 +2067,12 @@
   });
 
   document.addEventListener('keydown', (e) => {
+    if (e.target.id === 'open-answer-input' && e.key === 'Enter') {
+      e.preventDefault();
+      const chkBtn = document.querySelector('[data-action="open-check"]');
+      if (chkBtn) chkBtn.click();
+      return;
+    }
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
     if (state.syncModalOpen && e.key === 'Escape') {
       state.syncModalOpen = false;
@@ -1591,7 +2085,7 @@
         state.flipped = true;
         render();
       } else if ((e.key === 'h' || e.key === 'H') && !state.flipped) {
-        state.showHint = true;
+        state.showHint = !state.showHint;
         render();
       } else if (state.flipped && ['1', '2', '3', '4'].includes(e.key) && state.currentCardId) {
         applySM2(state.currentCardId, Number(e.key));
